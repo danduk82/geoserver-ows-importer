@@ -1,3 +1,10 @@
+import sys
+import os.path
+
+MYPATH = os.path.join(os.path.dirname(__file__), "../../../geoserver/")
+if MYPATH not in sys.path:
+    sys.path.append(MYPATH)
+
 import geoserver
 from geoserver.rest import ApiException
 from geoserver import (
@@ -5,7 +12,6 @@ from geoserver import (
     DataStoreInfoWrapper,
     ConnectionParameterEntry,
 )
-from .. import GEOSERVER_PASSWORD, GEOSERVER_URL, AUTHKEY, GEOSERVER_USERNAME
 
 import requests
 import json
