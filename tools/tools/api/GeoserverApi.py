@@ -169,36 +169,3 @@ class GeoserverAPI:
     def get_pg_layer(self, workspace_name, store_name, layer_name):
         pass
 
-
-from owslib import WebMapService, WebFeatureService
-from lxml import etree
-
-class WMSLayerImporter:
-    def __init__(wms: owslib.WebMapService, layerName: str):
-        self.crsOptions = wms.contents[layerName].crsOptions
-        self.boundingBox = wms.contents[layerName].boundingBox
-        self.boundingBoxWGS84 = wms.contents[layerName].boundingBoxWGS84
-        self.metadataUrls = wms.contents[layerName].metadataUrls
-        self.styles = wms.contents[layerName].styles
-        self.abstract = wms.contents[layerName].abstract
-        self.title = wms.contents[layerName].title
-
-    def printKeysOfDict(myDict):
-        for key in myDict.keys():
-            print(key)
-
-    def parseInspireExtendedCapabilities(wms: owslib.WebMapService):
-        capabilities_xml = wms.getServiceXML()
-        capabilities_tree = etree.fromstring(capabilities_xml)
-        print(etree.tostring(extended_capabilities).decode())
-        
-        namespaces={'inspire_vs': 'http://inspire.ec.europa.eu/schemas/inspire_vs/1.0'}
-        extended_capabilities = capabilities_tree.find('.//inspire_vs:ExtendedCapabilities', namespaces=namespaces)
-
-
-        # Define the namespace for INSPIRE elements
-        namespace = {'inspire_common': 'http://inspire.ec.europa.eu/schemas/common/1.0'}
-
-        # Find the inspire_common:MetadataUrl section
-        metadata_url_elements = capabilities_tree.xpath('.//inspire_common:MetadataUrl', namespaces=namespace)
-        
