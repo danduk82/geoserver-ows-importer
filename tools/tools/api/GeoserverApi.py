@@ -22,10 +22,18 @@ class GeoserverAPI:
         self, geoserver_rest_url, geoserver_username, geoserver_password
     ) -> None:
         self.configuration = geoserver.Configuration()
-        self.configuration.host = geoserver_rest_url
+        self.configuration.host = self.sanitize_rest_url(geoserver_rest_url)
         self.configuration.username = geoserver_username
         self.configuration.password = geoserver_password
 
+    @staticmethod
+    def sanitize_rest_url(url):
+        if url.endswith('/'):
+            url = url[:-1]
+        if not url.endswith('/rest'):
+            url = url + '/rest'
+        return url
+    
     def create_workspace(self, workspace_name, default=False):
         api_instance = geoserver.WorkspacesApi(geoserver.ApiClient(self.configuration))
         body = geoserver.WorkspaceWrapper(

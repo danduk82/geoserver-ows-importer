@@ -1,7 +1,6 @@
-from owslib.wms import WebMapService
 from owslib.wfs import WebFeatureService
 from lxml import etree
-from .api.GeoserverApi import GeoserverAPI
+from api.GeoserverApi import GeoserverAPI
 import xmltodict
 import json
 
@@ -9,27 +8,26 @@ import logging
 
 log = logging.getLogger()
 
-
-class WMSLayerImporter:
-    def __init__(self, wms_server_url: str, layerName: str, wms_version='1.3.0') -> None:
+class WFSLayerImporter:
+    def __init__(self, wfs_server_url: str, layerName: str, wfs_version='1.1.1') -> None:
         """[summary]
         Initialize the WMSLayerImporter class
         Input:
-        - wms_server_url: The URL of the WMS server
+        - wfs_server_url: The URL of the WMS server
         - layerName: The name of the layer to import
-        - wms_version: The WMS version to use
+        - wfs_version: The WMS version to use
         
         """
-        wms = WebMapService(wms_server_url, version=wms_version, timeout=60)
-        self.crsOptions = wms.contents[layerName].crsOptions
-        self.boundingBox = wms.contents[layerName].boundingBox
-        self.boundingBoxWGS84 = wms.contents[layerName].boundingBoxWGS84
-        self.metadataUrls = wms.contents[layerName].metadataUrls
-        self.styles = wms.contents[layerName].styles
-        self.keywords = wms.contents[layerName].keywords
-        self.abstract = wms.contents[layerName].abstract
-        self.title = wms.contents[layerName].title
-        self.capabilities_xml = wms.getServiceXML()
+        wfs = WebFeatureService(wfs_server_url, version=wfs_version, timeout=60)
+        self.crsOptions = wfs.contents[layerName].crsOptions
+        self.boundingBox = wfs.contents[layerName].boundingBox
+        self.boundingBoxWGS84 = wfs.contents[layerName].boundingBoxWGS84
+        self.metadataUrls = wfs.contents[layerName].metadataUrls
+        self.styles = wfs.contents[layerName].styles
+        self.keywords = wfs.contents[layerName].keywords
+        self.abstract = wfs.contents[layerName].abstract
+        self.title = wfs.contents[layerName].title
+        self.capabilities_xml = wfs.getServiceXML()
         self.inspireCapabilities = self.parseInspireExtendedCapabilities()
 
     def printKeysOfDict(myDict):
@@ -76,4 +74,3 @@ class WMSLayerImporter:
     
     def getInspireExtendedCapabilitiesAsXml(self):
         return xmltodict.unparse(self.inspireCapabilities) #.split('\n', 1)[1]
-
