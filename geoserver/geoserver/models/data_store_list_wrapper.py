@@ -28,7 +28,7 @@ class DataStoreListWrapper(object):
                             and the value is json key in definition.
     """
     swagger_types = {
-        'data_store': 'CatalogresponsesYamlcomponentsschemasNamedLinks'
+        'data_store': 'DataStoresListResponse'
     }
 
     attribute_map = {

@@ -1,5 +1,5 @@
 from api.GeoserverApi import GeoserverAPI
-from api import (
+from tools import (
     GEOSERVER_URL,
     GEOSERVER_REST_URL,
     GEOSERVER_PASSWORD,
@@ -29,40 +29,6 @@ from sqlalchemy import Column, Integer, String, Table, MetaData
 from sqlalchemy.engine import create_engine
 from geoalchemy2 import Geometry
 from urllib.parse import quote_plus as urlquote
-
-
-def randomStr(nb_char=10, str_type=string.ascii_lowercase, prefix=""):
-    return prefix + "".join(random.choices(str_type, k=nb_char))
-
-
-class StupidPgLayers:
-    def __init__(self, engine, table_name, workspace_name, geom_type="POINT"):
-        self.engine = engine
-        self.layer_name = table_name
-        self.workspace_name = workspace_name
-        self.metadata_obj = MetaData()
-        self.create_layer(table_name, geom_type)
-
-    def create_layer(self, table_name, geom_type="POINT"):
-        self._table = Table(
-            table_name,
-            self.metadata_obj,
-            Column("id", Integer, primary_key=True),
-            Column("name", String),
-            Column("geom", Geometry(geometry_type=geom_type, srid=3857)),
-        )
-        try:
-            self._table.create(self.engine)
-        except sqlalchemy.exc.ProgrammingError:
-            pass
-
-    def insert(self, name, geom):
-        stmt = sqlalchemy.insert(self._table).values(name=name, geom=geom)
-        with self.engine.connect() as conn:
-            result = conn.execute(stmt)
-
-    def drop(self):
-        self._table.drop(self.engine)
 
 
 class GeoserverBoostrap:

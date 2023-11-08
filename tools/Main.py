@@ -62,8 +62,8 @@ def main():
         config.configParser['layer']['layername'],
         config.configParser['input_server']['wms_version']
         )
-    # print(inputWmsServer)
-    # print(inputWmsServer.getInspireExtendedCapabilitiesAsXml())
+    log.debug(inputWmsServer)
+    log.debug(inputWmsServer.getInspireExtendedCapabilitiesAsXml())
     
     output_server = GeoserverAPI(
         config.configParser['output_server']['geoserver_url'],
@@ -71,7 +71,31 @@ def main():
         config.configParser['output_server']['geoserver_password']
         )
 
-    log.info(output_server.list_workspaces())
+    workspaces = output_server.list_workspaces()
+    log.debug(workspaces)
+    if config.configParser['output_server']['workspace'] not in workspaces:
+        output_server.create_workspace(config.configParser['output_server']['workspace'])
+    log.debug(output_server.list_workspaces())
+    
+    datastore_name = "something"
+    # try:
+    #     stores = output_server.list_datastores(config.configParser['output_server']['workspace'])
+    # except ValueError:
+    #     stores = []
+    # if datastore_name not in stores:
+    output_server.create_datastore(
+        config.configParser['output_server']['workspace'],
+        datastore_name,
+        config.configParser['database']['host'],
+        config.configParser['database']['port'],
+        config.configParser['database']['database'],
+        config.configParser['database']['username'],
+        config.configParser['database']['password']
+        )
+    
+    log.info(output_server.get_datastore(config.configParser['output_server']['workspace'], store_name=datastore_name))
+    
+    
     
 # if main script
 if __name__ == '__main__':

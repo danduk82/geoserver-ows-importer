@@ -31,7 +31,7 @@ class DataStoreResponse(object):
         'name': 'str',
         'description': 'str',
         'enabled': 'bool',
-        'workspace': 'CatalogresponsesYamlcomponentsschemasNamedLink',
+        'workspace': 'WorkspaceInfo',
         'connection_parameters': 'ConnectionParameters',
         'default': 'bool',
         'feature_types': 'str'

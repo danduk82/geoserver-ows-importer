@@ -87,7 +87,7 @@ class GeoserverAPI:
             workspaces.append(w["name"])
         return workspaces
 
-    def create_pg_store(
+    def create_datastore(
         self,
         workspace_name,
         store_name,
@@ -99,7 +99,7 @@ class GeoserverAPI:
     ):
 
         api_instance = geoserver.DatastoresApi(geoserver.ApiClient(self.configuration))
-        pg_store = DataStoreInfoWrapper(
+        datastore = DataStoreInfoWrapper(
             DataStoreInfo(
                 name=store_name,
                 enabled=True,
@@ -119,16 +119,31 @@ class GeoserverAPI:
 
         try:
             # Create a new data store
-            api_instance.create_datastore(pg_store, workspace_name)
+            api_instance.create_datastore(datastore, workspace_name)
         except ApiException as e:
             print("Exception when calling DatastoresApi->create_datastore: %s\n" % e)
         pass
 
-    def delete_pg_store(self, workspace_name, store_name):
+    def delete_datastore(self, workspace_name, store_name):
         pass
 
-    def get_pg_store(self, workspace_name, store_name):
-        pass
+    def get_datastore(self, workspace_name, store_name):
+        api_instance = geoserver.DatastoresApi(geoserver.ApiClient(self.configuration))
+        try:
+            # Get a list of workspaces
+            api_response = api_instance.get_data_store(workspace_name, store_name)
+        except ApiException as e:
+            print("Exception when calling DatastoresApi->get_datastore(): %s\n" % e)
+            return None    
+    
+    def list_datastores(self, workspace_name):
+        api_instance = geoserver.DatastoresApi(geoserver.ApiClient(self.configuration))
+        try:
+            # Get a list of workspaces
+            api_response = api_instance.get_datastores(workspace_name)
+        except ApiException as e:
+            print("Exception when calling DatastoresApi->get_datastores: %s\n" % e)
+            return None            
 
     def create_pg_layer(
         self, workspace_name, store_name, layer_name, native_name, feature_type="Point", srs="EPSG:3857"
