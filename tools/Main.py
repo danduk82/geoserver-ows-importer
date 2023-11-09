@@ -3,11 +3,12 @@ import argparse as ap
 from tools.Config import ScriptConfiguration
 from tools.WMSLayerImporter import WMSLayerImporter
 from tools.api.GeoserverApi import GeoserverAPI
+from tools.PGMetadata import PGMetadata
 import json
 
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 log = logging.Logger(__name__)
 
 handler = logging.StreamHandler()
@@ -76,6 +77,19 @@ def createDatastore(geoserver: GeoserverAPI, workspace: str, datastore_name: str
             )
     log.info(geoserver.get_datastore(workspace, store_name=datastore_name))
 
+def getLayerMetadata(config: ScriptConfiguration, schema_name: str, table_name: str):
+    metadata = PGMetadata(
+        schema_name,
+        table_name,
+        config.configParser['database']['host'],
+        config.configParser['database']['port'],
+        config.configParser['database']['database'],
+        config.configParser['database']['username'],
+        config.configParser['database']['password']
+    )
+    return metadata.getMetadata()
+
+
 def createLayers(
         geoserver: GeoserverAPI,
         workspace: str,
@@ -93,6 +107,7 @@ def createLayers(
         current_layer_name = config.configParser['layer']['layername'] + '_' + layer
         
         if current_layer_name not in layers:
+            feature_type_attributes = getLayerMetadata(config, config.configParser['database']['schema'], layers[layer]['tablename']) 
             geoserver.create_pg_layer(
                 workspace,
                 datastore_name,
@@ -103,6 +118,8 @@ def createLayers(
                 layers[layer]['srs'],
                 inputWmsServer.sublayers[layer].abstract
                 )
+            
+        
 
 def main():
 
