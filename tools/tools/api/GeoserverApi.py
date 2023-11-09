@@ -174,6 +174,24 @@ class GeoserverAPI:
                     "@class": "dataStore",
                     "name": f"{workspace_name}:{store_name}",
                 },
+                "attributes": {
+                    "attribute": [
+                        {
+                            "name": "name",
+                            "minOccurs": 0,
+                            "maxOccurs": 1,
+                            "nillable": True,
+                            "binding": "java.lang.String",
+                        },
+                        {
+                            "name": "geom",
+                            "minOccurs": 0,
+                            "maxOccurs": 1,
+                            "nillable": True,
+                            "binding": f"org.locationtech.jts.geom.{feature_type}",
+                        },
+                    ]
+                },
             }
         )
         try:
