@@ -146,7 +146,7 @@ class GeoserverAPI:
             return None            
 
     def create_pg_layer(
-        self, workspace_name, store_name, layer_name, native_name, feature_type="Point", srs="EPSG:3857"
+        self, workspace_name, store_name, layer_name, title, native_name, feature_type="Point", srs="EPSG:3857"
     ):
         api_instance = geoserver.FeaturetypesApi(
             geoserver.ApiClient(self.configuration)
@@ -156,7 +156,7 @@ class GeoserverAPI:
                 "name": layer_name,
                 "nativeName": native_name,
                 "namespace": {"name": workspace_name},
-                "title": layer_name,
+                "title": title,
                 "keywords": {"string": ["features", layer_name]},
                 "srs": srs,
                 "projectionPolicy": "FORCE_DECLARED",

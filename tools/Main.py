@@ -51,6 +51,30 @@ def load_config(args: ap.Namespace)->ScriptConfiguration:
 # - table name
 # - data store name
 
+def createWorkspace(geoserver: GeoserverAPI, workspace: str):
+    workspaces = geoserver.list_workspaces()
+    log.debug(workspaces)
+    if workspace not in workspaces:
+        geoserver.create_workspace(workspace)
+    log.debug(geoserver.list_workspaces())
+    
+def createDatastore(geoserver: GeoserverAPI, workspace: str, datastore_name: str, config: ScriptConfiguration):
+    try:
+        stores = geoserver.list_datastores(workspace)
+    except ValueError:
+        stores = []
+    if datastore_name not in stores:
+        geoserver.create_datastore(
+            workspace,
+            datastore_name,
+            config.configParser['database']['host'],
+            config.configParser['database']['port'],
+            config.configParser['database']['database'],
+            config.configParser['database']['username'],
+            config.configParser['database']['password']
+            )
+    log.info(geoserver.get_datastore(workspace, store_name=datastore_name))
+
 def main():
 
     args = parse_args()
@@ -58,43 +82,25 @@ def main():
     # print(config.configParser.sections())
     
     inputWmsServer = WMSLayerImporter(
-        config.configParser['input_server']['url'], 
+        config.configParser['fis_broker']['url'], 
         config.configParser['layer']['layername'],
-        config.configParser['input_server']['wms_version']
+        config.configParser['fis_broker']['wms_version']
         )
     log.debug(inputWmsServer)
     log.debug(inputWmsServer.getInspireExtendedCapabilitiesAsXml())
     
-    output_server = GeoserverAPI(
-        config.configParser['output_server']['geoserver_url'],
-        config.configParser['output_server']['geoserver_username'],
-        config.configParser['output_server']['geoserver_password']
+    geoserver = GeoserverAPI(
+        config.configParser['geoserver']['geoserver_url'],
+        config.configParser['geoserver']['geoserver_username'],
+        config.configParser['geoserver']['geoserver_password']
         )
 
-    workspaces = output_server.list_workspaces()
-    log.debug(workspaces)
-    if config.configParser['output_server']['workspace'] not in workspaces:
-        output_server.create_workspace(config.configParser['output_server']['workspace'])
-    log.debug(output_server.list_workspaces())
+    workspace = config.configParser['layer']['workspace']
+    createWorkspace(geoserver, workspace)
+    schema = config.configParser['database']['schema']
     
-    datastore_name = "something"
-    # try:
-    #     stores = output_server.list_datastores(config.configParser['output_server']['workspace'])
-    # except ValueError:
-    #     stores = []
-    # if datastore_name not in stores:
-    output_server.create_datastore(
-        config.configParser['output_server']['workspace'],
-        datastore_name,
-        config.configParser['database']['host'],
-        config.configParser['database']['port'],
-        config.configParser['database']['database'],
-        config.configParser['database']['username'],
-        config.configParser['database']['password']
-        )
-    
-    log.info(output_server.get_datastore(config.configParser['output_server']['workspace'], store_name=datastore_name))
-    
+    datastore_name = f"pg_{workspace}_{schema}"
+    createDatastore(geoserver, workspace, datastore_name, config)
     
     
 # if main script
