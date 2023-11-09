@@ -20,21 +20,31 @@ class WMSLayerImporter:
         - wms_version: The WMS version to use
         
         """
-        wms = WebMapService(wms_server_url, version=wms_version, timeout=60)
-        self.crsOptions = wms.contents[layerName].crsOptions
-        self.boundingBox = wms.contents[layerName].boundingBox
-        self.boundingBoxWGS84 = wms.contents[layerName].boundingBoxWGS84
-        self.metadataUrls = wms.contents[layerName].metadataUrls
-        self.styles = wms.contents[layerName].styles
-        self.keywords = wms.contents[layerName].keywords
-        self.abstract = wms.contents[layerName].abstract
-        self.title = wms.contents[layerName].title
-        self.capabilities_xml = wms.getServiceXML()
+        self.wms = WebMapService(wms_server_url, version=wms_version, timeout=60)
+        self.layername = layerName
+        self.crsOptions = self.wms.contents[layerName].crsOptions
+        self.boundingBox = self.wms.contents[layerName].boundingBox
+        self.boundingBoxWGS84 = self.wms.contents[layerName].boundingBoxWGS84
+        self.metadataUrls = self.wms.contents[layerName].metadataUrls
+        self.styles = self.wms.contents[layerName].styles
+        self.keywords = self.wms.contents[layerName].keywords
+        self.abstract = self.wms.contents[layerName].abstract
+        self.title = self.wms.contents[layerName].title
+        self.extractSublayers()
+        self.capabilities_xml = self.wms.getServiceXML()
         self.inspireCapabilities = self.parseInspireExtendedCapabilities()
 
     def printKeysOfDict(myDict):
         for key in myDict.keys():
             print(key)
+            
+    def extractSublayers(self):
+        """[summary]
+        Extract the sublayers of the WMS layer
+        """
+        self.sublayers = {}
+        for l in self.wms.contents[self.layername].layers:
+            self.sublayers[l.name] = l
             
     def __repr__(self):
         # return all the attributes of the class as json

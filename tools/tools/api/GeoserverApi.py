@@ -146,7 +146,15 @@ class GeoserverAPI:
             return None            
 
     def create_pg_layer(
-        self, workspace_name, store_name, layer_name, title, native_name, feature_type="Point", srs="EPSG:3857"
+        self,
+        workspace_name,
+        store_name,
+        layer_name,
+        title,
+        table_name,
+        feature_type="Point",
+        srs="EPSG:3857",
+        abstract=""
     ):
         api_instance = geoserver.FeaturetypesApi(
             geoserver.ApiClient(self.configuration)
@@ -154,7 +162,8 @@ class GeoserverAPI:
         body = geoserver.FeatureTypeInfoWrapper(
             feature_type={
                 "name": layer_name,
-                "nativeName": native_name,
+                "nativeName": table_name,
+                "abstract": abstract,
                 "namespace": {"name": workspace_name},
                 "title": title,
                 "keywords": {"string": ["features", layer_name]},
@@ -179,4 +188,8 @@ class GeoserverAPI:
 
     def get_pg_layer(self, workspace_name, store_name, layer_name):
         pass
+    
+    def list_layers(self, workspace_name):
+        api_instance = geoserver.FeaturetypesApi(geoserver.ApiClient(self.configuration))
+        return api_instance.get_feature_types_by_workspace(workspace_name)
 

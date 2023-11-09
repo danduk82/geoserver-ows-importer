@@ -3,6 +3,7 @@ import argparse as ap
 from tools.Config import ScriptConfiguration
 from tools.WMSLayerImporter import WMSLayerImporter
 from tools.api.GeoserverApi import GeoserverAPI
+import json
 
 import logging
 
@@ -75,6 +76,34 @@ def createDatastore(geoserver: GeoserverAPI, workspace: str, datastore_name: str
             )
     log.info(geoserver.get_datastore(workspace, store_name=datastore_name))
 
+def createLayers(
+        geoserver: GeoserverAPI,
+        workspace: str,
+        datastore_name: str,
+        config: ScriptConfiguration,
+        inputWmsServer: WMSLayerImporter
+    ):
+    #log.debug(geoserver.list_layers(workspace))
+    try:
+        existing_layers = geoserver.list_layers(workspace)
+    except AttributeError:
+        existing_layers = []
+    layers = json.loads(config.configParser['layer']['sublayers'])
+    for layer,layerdefinition in layers.items():
+        current_layer_name = config.configParser['layer']['layername'] + '_' + layer
+        
+        if current_layer_name not in layers:
+            geoserver.create_pg_layer(
+                workspace,
+                datastore_name,
+                current_layer_name,
+                inputWmsServer.sublayers[layer].title,
+                config.configParser['database']['schema'] + '.' + layers[layer]['tablename'],
+                layers[layer]['featuretype'],
+                layers[layer]['srs'],
+                inputWmsServer.sublayers[layer].abstract
+                )
+
 def main():
 
     args = parse_args()
@@ -102,6 +131,7 @@ def main():
     datastore_name = f"pg_{workspace}_{schema}"
     createDatastore(geoserver, workspace, datastore_name, config)
     
+    createLayers(geoserver, workspace, datastore_name, config, inputWmsServer)
     
 # if main script
 if __name__ == '__main__':
