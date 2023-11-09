@@ -143,8 +143,88 @@ class GeoserverAPI:
             api_response = api_instance.get_datastores(workspace_name)
         except ApiException as e:
             print("Exception when calling DatastoresApi->get_datastores: %s\n" % e)
-            return None            
+            return None          
+        
+    # function that maps type with java type
+    @Private
+    def _map_type(self, type):
+        # this enum converts the following pg types to java types:
+        #  interval
+        # name
+        # smallint
+        # inet
+        # pg_node_tree
+        # boolean
+        # text
+        # numeric
+        # anyarray
+        # regproc
+        # regtype
+        # USER-DEFINED
+        # timestamp with time zone
+        # bigint
+        # double precision
+        # ARRAY
+        # pg_ndistinct
+        # pg_dependencies
+        # xid
+        # "char"
+        # timestamp without time zone
+        # character varying
+        # bytea
+        # integer
+        # pg_lsn
+        # real
+        # oid
+        types_conversion_dict = {
+            "interval": "java.lang.Interval",
+            "name": "java.lang.String",
+            "smallint": "java.lang.Short",
+            "inet": "java.lang.String",
+            "pg_node_tree": "java.lang.String",
+            "boolean": "java.lang.Boolean",
+            "text": "java.lang.String",
+            "numeric": "java.math.BigDecimal",
+            "anyarray": "java.lang.String",
+            "regproc": "java.lang.String",
+            "regtype": "java.lang.String",
+            "USER-DEFINED": "java.lang.String",
+            "timestamp with time zone": "java.sql.Timestamp",  # Or use java.time.OffsetDateTime for Java 8+
+            "bigint": "java.lang.Long",
+            "double precision": "java.lang.Double",
+            "xid": "java.lang.String",
+            "char": "java.lang.String",
+            "timestamp without time zone": "java.sql.Timestamp",  # Or use java.time.LocalDateTime for Java 8+
+            "character varying": "java.lang.String",
+            "bytea": "byte[]",  # Represent binary data as a byte array
+            "integer": "java.lang.Integer",
+            "real": "java.lang.Float"
+        }
+            
+            
+            
+        
+      
 
+    @Private
+    def _generate_attribute_list(self, metadata):
+        attributes = []
+        for attribute, type in metadata.items():
+            if attribute == "geom":
+                continue
+            if type == "USER-DEFINED":
+                type = "VARCHAR"
+            attributes.append(
+                {
+                    "name": attribute,
+                    "minOccurs": 0,
+                    "maxOccurs": 1,
+                    "nillable": True,
+                    "binding": f"java.lang.{type}",
+                }
+            )
+        return attributes
+    
     def create_pg_layer(
         self,
         workspace_name,
@@ -159,22 +239,7 @@ class GeoserverAPI:
         api_instance = geoserver.FeaturetypesApi(
             geoserver.ApiClient(self.configuration)
         )
-        body = geoserver.FeatureTypeInfoWrapper(
-            feature_type={
-                "name": layer_name,
-                "nativeName": table_name,
-                "abstract": abstract,
-                "namespace": {"name": workspace_name},
-                "title": title,
-                "keywords": {"string": ["features", layer_name]},
-                "srs": srs,
-                "projectionPolicy": "FORCE_DECLARED",
-                "enabled": True,
-                "store": {
-                    "@class": "dataStore",
-                    "name": f"{workspace_name}:{store_name}",
-                },
-                "attributes": {
+        attributes =  {
                     "attribute": [
                         {
                             "name": "name",
@@ -191,7 +256,24 @@ class GeoserverAPI:
                             "binding": f"org.locationtech.jts.geom.{feature_type}",
                         },
                     ]
+                }
+        
+        body = geoserver.FeatureTypeInfoWrapper(
+            feature_type={
+                "name": layer_name,
+                "nativeName": table_name,
+                "abstract": abstract,
+                "namespace": {"name": workspace_name},
+                "title": title,
+                "keywords": {"string": ["features", layer_name]},
+                "srs": srs,
+                "projectionPolicy": "FORCE_DECLARED",
+                "enabled": True,
+                "store": {
+                    "@class": "dataStore",
+                    "name": f"{workspace_name}:{store_name}",
                 },
+                "attributes": attributes
             }
         )
         try:
