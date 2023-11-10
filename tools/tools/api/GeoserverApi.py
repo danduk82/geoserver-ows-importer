@@ -1,30 +1,17 @@
 import sys
 import os.path
 
-MYPATH = os.path.join(os.path.dirname(__file__), "../../../geoserver/")
-if MYPATH not in sys.path:
-    sys.path.append(MYPATH)
-
-import geoserver
-from geoserver.rest import ApiException
-from geoserver import (
-    DataStoreInfo,
-    DataStoreInfoWrapper,
-    ConnectionParameterEntry,
-)
-
 import requests
 import json
 
 
-class GeoserverAPI:
-    def __init__(
-        self, geoserver_rest_url, geoserver_username, geoserver_password
-    ) -> None:
-        self.configuration = geoserver.Configuration()
-        self.configuration.host = self.sanitize_rest_url(geoserver_rest_url)
-        self.configuration.username = geoserver_username
-        self.configuration.password = geoserver_password
+class GeoserverRestAPI:
+    def __init__(self, geoserver_base_url, username, password) -> None:
+        self.geoserver_base_url = geoserver_base_url
+        self.username = username
+        self.password = password
+        self.geoserver_rest_url = self.sanitize_rest_url(geoserver_base_url)
+        self.headers = {"Content-Type": "application/json"}
 
     @staticmethod
     def sanitize_rest_url(url):
@@ -34,58 +21,49 @@ class GeoserverAPI:
             url = url + '/rest'
         return url
     
+    def GET(self, endpoint_url):
+        url = self.geoserver_rest_url + endpoint_url
+        response = requests.get(url, auth=(self.username, self.password), headers=self.headers)
+        return response
+    
+    def POST(self, endpoint_url, data):
+        url = self.geoserver_rest_url + endpoint_url
+        response = requests.post(url, auth=(self.username, self.password), headers=self.headers, data=data)
+        return response
+    
+    def PUT(self, endpoint_url, data):
+        url = self.geoserver_rest_url + endpoint_url
+        response = requests.put(url, auth=(self.username, self.password), headers=self.headers, data=data)
+        return response
+    
+    def DELETE(self, endpoint_url):
+        url = self.geoserver_rest_url + endpoint_url
+        response = requests.delete(url, auth=(self.username, self.password), headers=self.headers)
+        return response
+    
+    
+class GeoserverAPI:
+    def __init__(
+        self, geoserver_rest_url, geoserver_username, geoserver_password
+    ) -> None:
+        self.geoserverRestApi = GeoserverRestAPI(geoserver_rest_url, geoserver_username, geoserver_password)
+
+
+    
     def create_workspace(self, workspace_name, default=False):
-        api_instance = geoserver.WorkspacesApi(geoserver.ApiClient(self.configuration))
-        body = geoserver.WorkspaceWrapper(
-            geoserver.WorkspaceInfo(workspace_name)
-        )  # WorkspaceWrapper | The Workspace body information to upload.
-        try:
-            # add a new workspace to GeoServer
-            api_instance.create_workspace(body, default=default)
-        except ApiException as e:
-            print("Exception when calling WorkspacesApi->create_workspace: %s\n" % e)
-            return None
-        return True
+        pass
 
     def get_workspace(self, workspace_name):
-        api_instance = geoserver.WorkspacesApi(geoserver.ApiClient(self.configuration))
-        try:
-            api_response = api_instance.get_workspace(workspace_name)
-        except ApiException as e:
-            print(
-                "Exception when calling Workspaces->get_workspace('%s'): %s\n"
-                % (workspace_name, e)
-            )
-            return None
-        return api_response
+        pass
 
     def update_workspace(self, workspace_name):
         pass
 
     def delete_workspace(self, workspace_name):
-        api_instance = geoserver.WorkspacesApi(geoserver.ApiClient(self.configuration))
-        try:
-            # Get a list of workspaces
-            api_response = api_instance.delete_workspace(workspace_name, recurse=True)
-        except ApiException as e:
-            print(
-                "Exception when calling WorkspacesApi->delete_workspace(%s): %s\n"
-                % (workspace_name, e)
-            )
-            return None
+        pass
 
     def list_workspaces(self):
-        api_instance = geoserver.WorkspacesApi(geoserver.ApiClient(self.configuration))
-        try:
-            # Get a list of workspaces
-            api_response = api_instance.get_workspaces()
-        except ApiException as e:
-            print("Exception when calling WorkspacesApi->get_workspaces: %s\n" % e)
-            return None
-        workspaces = []
-        for w in api_response.to_dict()["workspaces"]["workspace"]:
-            workspaces.append(w["name"])
-        return workspaces
+        pass
 
     def create_datastore(
         self,
@@ -98,134 +76,18 @@ class GeoserverAPI:
         password="password",
     ):
 
-        api_instance = geoserver.DatastoresApi(geoserver.ApiClient(self.configuration))
-        datastore = DataStoreInfoWrapper(
-            DataStoreInfo(
-                name=store_name,
-                enabled=True,
-                workspace=workspace_name,
-                connection_parameters={
-                    "entry": [
-                        ConnectionParameterEntry(key="host", value=host),
-                        ConnectionParameterEntry(key="port", value=port),
-                        ConnectionParameterEntry(key="database", value=database),
-                        ConnectionParameterEntry(key="user", value=username),
-                        ConnectionParameterEntry(key="passwd", value=password),
-                        ConnectionParameterEntry(key="dbtype", value="postgis"),
-                    ]
-                },
-            )
-        )
-
-        try:
-            # Create a new data store
-            api_instance.create_datastore(datastore, workspace_name)
-        except ApiException as e:
-            print("Exception when calling DatastoresApi->create_datastore: %s\n" % e)
         pass
 
     def delete_datastore(self, workspace_name, store_name):
         pass
 
     def get_datastore(self, workspace_name, store_name):
-        api_instance = geoserver.DatastoresApi(geoserver.ApiClient(self.configuration))
-        try:
-            # Get a list of workspaces
-            api_response = api_instance.get_data_store(workspace_name, store_name)
-        except ApiException as e:
-            print("Exception when calling DatastoresApi->get_datastore(): %s\n" % e)
-            return None    
+        pass
     
     def list_datastores(self, workspace_name):
-        api_instance = geoserver.DatastoresApi(geoserver.ApiClient(self.configuration))
-        try:
-            # Get a list of workspaces
-            api_response = api_instance.get_datastores(workspace_name)
-        except ApiException as e:
-            print("Exception when calling DatastoresApi->get_datastores: %s\n" % e)
-            return None          
-        
-    # function that maps type with java type
-    @Private
-    def _map_type(self, type):
-        # this enum converts the following pg types to java types:
-        #  interval
-        # name
-        # smallint
-        # inet
-        # pg_node_tree
-        # boolean
-        # text
-        # numeric
-        # anyarray
-        # regproc
-        # regtype
-        # USER-DEFINED
-        # timestamp with time zone
-        # bigint
-        # double precision
-        # ARRAY
-        # pg_ndistinct
-        # pg_dependencies
-        # xid
-        # "char"
-        # timestamp without time zone
-        # character varying
-        # bytea
-        # integer
-        # pg_lsn
-        # real
-        # oid
-        types_conversion_dict = {
-            "interval": "java.lang.Interval",
-            "name": "java.lang.String",
-            "smallint": "java.lang.Short",
-            "inet": "java.lang.String",
-            "pg_node_tree": "java.lang.String",
-            "boolean": "java.lang.Boolean",
-            "text": "java.lang.String",
-            "numeric": "java.math.BigDecimal",
-            "anyarray": "java.lang.String",
-            "regproc": "java.lang.String",
-            "regtype": "java.lang.String",
-            "USER-DEFINED": "java.lang.String",
-            "timestamp with time zone": "java.sql.Timestamp",  # Or use java.time.OffsetDateTime for Java 8+
-            "bigint": "java.lang.Long",
-            "double precision": "java.lang.Double",
-            "xid": "java.lang.String",
-            "char": "java.lang.String",
-            "timestamp without time zone": "java.sql.Timestamp",  # Or use java.time.LocalDateTime for Java 8+
-            "character varying": "java.lang.String",
-            "bytea": "byte[]",  # Represent binary data as a byte array
-            "integer": "java.lang.Integer",
-            "real": "java.lang.Float"
-        }
-            
-            
-            
-        
-      
-
-    @Private
-    def _generate_attribute_list(self, metadata):
-        attributes = []
-        for attribute, type in metadata.items():
-            if attribute == "geom":
-                continue
-            if type == "USER-DEFINED":
-                type = "VARCHAR"
-            attributes.append(
-                {
-                    "name": attribute,
-                    "minOccurs": 0,
-                    "maxOccurs": 1,
-                    "nillable": True,
-                    "binding": f"java.lang.{type}",
-                }
-            )
-        return attributes
+        pass
     
-    def create_pg_layer(
+    def create_featuretype(
         self,
         workspace_name,
         store_name,
@@ -236,60 +98,14 @@ class GeoserverAPI:
         srs="EPSG:3857",
         abstract=""
     ):
-        api_instance = geoserver.FeaturetypesApi(
-            geoserver.ApiClient(self.configuration)
-        )
-        attributes =  {
-                    "attribute": [
-                        {
-                            "name": "name",
-                            "minOccurs": 0,
-                            "maxOccurs": 1,
-                            "nillable": True,
-                            "binding": "java.lang.String",
-                        },
-                        {
-                            "name": "geom",
-                            "minOccurs": 0,
-                            "maxOccurs": 1,
-                            "nillable": True,
-                            "binding": f"org.locationtech.jts.geom.{feature_type}",
-                        },
-                    ]
-                }
-        
-        body = geoserver.FeatureTypeInfoWrapper(
-            feature_type={
-                "name": layer_name,
-                "nativeName": table_name,
-                "abstract": abstract,
-                "namespace": {"name": workspace_name},
-                "title": title,
-                "keywords": {"string": ["features", layer_name]},
-                "srs": srs,
-                "projectionPolicy": "FORCE_DECLARED",
-                "enabled": True,
-                "store": {
-                    "@class": "dataStore",
-                    "name": f"{workspace_name}:{store_name}",
-                },
-                "attributes": attributes
-            }
-        )
-        try:
-            api_instance.create_feature_type(body, workspace_name)
-        except ApiException as e:
-            print(
-                "Exception when calling FeaturetypesApi->create_feature_type: %s\n" % e
-            )
-
-    def delete_pg_layer(self, workspace_name, store_name, layer_name):
         pass
 
-    def get_pg_layer(self, workspace_name, store_name, layer_name):
+    def delete_featuretype(self, workspace_name, store_name, layer_name):
+        pass
+
+    def get_featuretype(self, workspace_name, store_name, layer_name):
         pass
     
-    def list_layers(self, workspace_name):
-        api_instance = geoserver.FeaturetypesApi(geoserver.ApiClient(self.configuration))
-        return api_instance.get_feature_types_by_workspace(workspace_name)
+    def list_featuretypes(self, workspace_name):
+        pass
 
