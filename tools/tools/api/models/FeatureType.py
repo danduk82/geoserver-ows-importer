@@ -114,7 +114,12 @@ class FeatureType:
     def responseSchema(self):
         return self._responseSchema
     
-    def __init__(self):
+    def endpoint_url(self):
+        return f"/workspaces/{self.workspace}/featuretypes/{self.featureTypeName}.json"
+    
+    def __init__(self, workspace, feature_type_name) -> None:
+        self.featureTypeName = feature_type_name
+        self.workspace = workspace
         pass
     
     def validate(self, response):
@@ -125,9 +130,7 @@ class FeatureType:
             return False
         return True
             
-    def fetchFeatureType(self, workspace):
-        response = requests.get(self.listUrl(self.geoserverInstance.restUrl, workspace), auth=(self.geoserverInstance.username, self.geoserverInstance.password)
-        # Check if the request was successful (status code 200)
+    def parseResponse(self, response):
         if response.status_code == 200:
             # Parse the JSON response
             self.featureType = response.json()
