@@ -61,9 +61,8 @@ class GeoserverAPI:
     ) -> None:
         self.geoserverRestApi = GeoserverRestAPI(geoserver_rest_url, geoserver_username, geoserver_password)
 
-    
     def create_workspace(self, workspace_name):
-        self.populate_workspaces()
+        self._populate_workspaces()
         newWorkspace = Workspace.Workspace(self.geoserverRestApi, workspace_name)
         
         if not self.workspaces.find(workspace_name):
@@ -76,20 +75,19 @@ class GeoserverAPI:
         raise NotImplementedError
 
     def delete_workspace(self, workspace_name):
-        self.populate_workspaces()
+        self._populate_workspaces()
         delWorkspace = Workspace.Workspace(self.geoserverRestApi, workspace_name)
         if self.workspaces.find(workspace_name):
             self.geoserverRestApi.DELETE(delWorkspace.endpoint_url_delete())
         
-
-    def populate_workspaces(self):
+    def _populate_workspaces(self):
         self.workspaces = Workspaces.Workspaces(self.geoserverRestApi)
         response = self.geoserverRestApi.GET(self.workspaces.endpoint_url())
         self.workspaces.parseResponse(response)
         
     def get_workspaces(self):
+        self._populate_workspaces()
         return self.workspaces.workspaces
-        
 
     def create_datastore(
         self,
@@ -101,8 +99,14 @@ class GeoserverAPI:
         username="username",
         password="password",
     ):
-
-        pass
+        if not store_name in self.get_datastores_per_workspace(workspace_name):
+            connectionParameters = {"host": host, "port": port, "database": database, "user": username, "passwd": password, "dbtype": "postgis"}
+            newDataStore = DataStore.DataStore(
+                workspace_name,
+                store_name,
+                connectionParameters
+            )
+            self.geoserverRestApi.POST(self.datastores[workspace_name].endpoint_url(), newDataStore.post_payload())
 
     def delete_datastore(self, workspace_name, store_name):
         raise NotImplementedError
@@ -110,11 +114,23 @@ class GeoserverAPI:
     def get_datastore(self, workspace_name, store_name):
         raise NotImplementedError
     
-    def get_datastores(self, workspace_name):
-        dataStore = DataStores.DataStores(workspace_name)
-        response = self.geoserverRestApi.GET(dataStore.endpoint_url())
-        dataStore.parseResponse(response)
-        return dataStore.data_stores
+    def _populate_datastores(self):
+        self.datastores = {}
+        for workspace_name in self.get_workspaces():
+            self.datastores[workspace_name] = DataStores.DataStores(workspace_name)
+            response = self.geoserverRestApi.GET(self.datastores[workspace_name].endpoint_url())
+            self.datastores[workspace_name].parseResponse(response)
+    
+    def _refresh_datastores_per_workspace(self, workspace_name):
+        if not hasattr(self, "datastores"):
+            self._populate_datastores()
+        self.datastores[workspace_name] = DataStores.DataStores(workspace_name)
+        response = self.geoserverRestApi.GET(self.datastores[workspace_name].endpoint_url())
+        self.datastores[workspace_name].parseResponse(response)
+        
+    def get_datastores_per_workspace(self, workspace_name):
+        self._refresh_datastores_per_workspace(workspace_name)
+        return self.datastores[workspace_name].dataStores
     
     def create_featuretype(
         self,

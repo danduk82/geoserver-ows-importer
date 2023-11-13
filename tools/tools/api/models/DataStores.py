@@ -14,7 +14,7 @@ class DataStores:
     
     def __init__(self, workspace) -> None:
         self.workspace = workspace
-        self.data_stores = {}
+        self.dataStores = {}
         
     
     def endpoint_url(self):
@@ -51,7 +51,9 @@ class DataStores:
     
     def validate(self, response):
         try:
-            jsonschema.validate(response, self.responseSchema)
+            log.debug("validate: response = " + str(response))
+            if not response["dataStores"] == '':
+                jsonschema.validate(response, self.responseSchema)
         except jsonschema.exceptions.ValidationError as err:
             print(err)
             return False
@@ -64,13 +66,14 @@ class DataStores:
             json_data = response.json()
             if not (self.validate(json_data)):
                 raise Exception("Invalid from datastores")
-    
-
             # Map the response to a list of DataStore instances
-            self.data_stores = [DataStoreItem(store['name'], store['href']) for store in json_data.get('dataStores', {}).get('dataStore', [])]
+            try:
+                self.dataStores = [DataStoreItem(store['name'], store['href']) for store in json_data.get('dataStores', {}).get('dataStore', [])]
+            except AttributeError:
+                self.dataStores = []
 
-            # Now 'data_stores' is a list of DataStore instances
-            for data_store in self.data_stores:
+            # Now 'dataStores' is a list of DataStore instances
+            for data_store in self.dataStores:
                 log.debug(f"Name: {data_store.name}, Href: {data_store.href}")
         else:
             log.error(f"Error: {response.status_code}")

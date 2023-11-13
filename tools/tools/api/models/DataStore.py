@@ -63,11 +63,31 @@ class DataStore:
         }
 
 
-    def __init__(self, geoserver_instance, workspace_name, data_store_name) -> None:
-        self.geoserver_instance = geoserver_instance
+    def __init__(self, workspace_name, data_store_name, connection_parameters, data_store_type="PostGIS") -> None:
         self.workspace_name = workspace_name
         self.data_store_name = data_store_name
-        self.connection_parameters = None
+        self.connection_parameters = connection_parameters
+        self.data_store_type = data_store_type
+        
+    def endpoint_url(self):
+        return f"/workspaces/{self.workspace_name}/datastores/{self.data_store_name}.json"
+    
+    def post_payload(self):
+        return {
+            "dataStore": {
+                "name": self.data_store_name,
+                "type": self.data_store_type,
+                "enabled": True,
+                "workspace": {
+                    "name": self.workspace_name
+                },
+                "connectionParameters": {
+                    "entry": [
+                        {"@key": key, "$": value} for key, value in self.connection_parameters.items()
+                    ]
+                }
+            }
+        }
 
     def fetch_data_store_response(self):
         url = f"{self.geoserver_instance.rest_url}/workspaces/{self.workspace_name}/datastores/{self.data_store_name}.json"

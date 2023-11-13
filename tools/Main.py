@@ -55,25 +55,19 @@ def load_config(args: ap.Namespace)->ScriptConfiguration:
 
 def createWorkspace(geoserver: GeoserverAPI, workspace: str):
     geoserver.create_workspace(workspace)
-    #geoserver.delete_workspace(workspace)
-    raise NotImplementedError
     
 def createDatastore(geoserver: GeoserverAPI, workspace: str, datastore_name: str, config: ScriptConfiguration):
-    try:
-        stores = geoserver.list_datastores(workspace)
-    except ValueError:
-        stores = []
-    if datastore_name not in stores:
-        geoserver.create_datastore(
-            workspace,
-            datastore_name,
-            config.configParser['database']['host'],
-            config.configParser['database']['port'],
-            config.configParser['database']['database'],
-            config.configParser['database']['username'],
-            config.configParser['database']['password']
-            )
-    log.info(geoserver.get_datastore(workspace, store_name=datastore_name))
+
+    geoserver.create_datastore(
+        workspace,
+        datastore_name,
+        config.configParser['database']['host'],
+        config.configParser['database']['port'],
+        config.configParser['database']['database'],
+        config.configParser['database']['username'],
+        config.configParser['database']['password']
+        )
+    #log.info(geoserver.get_datastore(workspace, store_name=datastore_name))
 
 def getLayerMetadata(config: ScriptConfiguration, schema_name: str, table_name: str):
     metadata = PGMetadata(
