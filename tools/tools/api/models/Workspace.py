@@ -41,8 +41,7 @@ class Workspace:
     def post_payload(self, is_isolated=False):
         return {
             "workspace": {
-                "name": self.workspace_name,
-                "isolated": is_isolated
+                "name": self.workspace_name
             }
         }
         

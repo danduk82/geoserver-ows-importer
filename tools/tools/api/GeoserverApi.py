@@ -30,21 +30,26 @@ class GeoserverRestAPI:
     def GET(self, endpoint_url):
         url = self.geoserver_rest_url + endpoint_url
         response = requests.get(url, auth=(self.username, self.password), headers=self.headers)
+        log.debug(url)
         return response
     
     def POST(self, endpoint_url, data):
         url = self.geoserver_rest_url + endpoint_url
-        response = requests.post(url, auth=(self.username, self.password), headers=self.headers, data=data)
+        response = requests.post(url, auth=(self.username, self.password), headers=self.headers, json=data)
+        log.debug(url)
+        log.debug(data)
         return response
     
     def PUT(self, endpoint_url, data):
         url = self.geoserver_rest_url + endpoint_url
-        response = requests.put(url, auth=(self.username, self.password), headers=self.headers, data=data)
+        response = requests.put(url, auth=(self.username, self.password), headers=self.headers, json=data)
+        log.debug(url)
+        log.debug(data)
         return response
     
     def DELETE(self, endpoint_url, data=None):
         url = self.geoserver_rest_url + endpoint_url
-        response = requests.delete(url, auth=(self.username, self.password), headers=self.headers, data=None)
+        response = requests.delete(url, auth=(self.username, self.password), headers=self.headers, json=data)
         log.debug(url)
         log.debug(data)
         return response
@@ -58,28 +63,26 @@ class GeoserverAPI:
 
     
     def create_workspace(self, workspace_name):
-        self.list_workspaces()
+        self.populate_workspaces()
         newWorkspace = Workspace.Workspace(self.geoserverRestApi, workspace_name)
         
         if not self.workspaces.find(workspace_name):
             self.geoserverRestApi.POST(self.workspaces.endpoint_url(), newWorkspace.post_payload())
         
-
     def get_workspace(self, workspace_name):
-        
-        pass
+        raise NotImplementedError
 
     def update_workspace(self, workspace_name):
-        pass
+        raise NotImplementedError
 
     def delete_workspace(self, workspace_name):
-        self.list_workspaces()
+        self.populate_workspaces()
         delWorkspace = Workspace.Workspace(self.geoserverRestApi, workspace_name)
         if self.workspaces.find(workspace_name):
             self.geoserverRestApi.DELETE(delWorkspace.endpoint_url_delete())
         
 
-    def list_workspaces(self):
+    def populate_workspaces(self):
         self.workspaces = Workspaces.Workspaces(self.geoserverRestApi)
         response = self.geoserverRestApi.GET(self.workspaces.endpoint_url())
         self.workspaces.parseResponse(response)
@@ -102,10 +105,10 @@ class GeoserverAPI:
         pass
 
     def delete_datastore(self, workspace_name, store_name):
-        pass
+        raise NotImplementedError
 
     def get_datastore(self, workspace_name, store_name):
-        pass
+        raise NotImplementedError
     
     def get_datastores(self, workspace_name):
         dataStore = DataStores.DataStores(workspace_name)
@@ -124,14 +127,14 @@ class GeoserverAPI:
         srs="EPSG:3857",
         abstract=""
     ):
-        pass
+        raise NotImplementedError
 
     def delete_featuretype(self, workspace_name, store_name, layer_name):
-        pass
+        raise NotImplementedError
 
     def get_featuretype(self, workspace_name, store_name, layer_name):
-        pass
+        raise NotImplementedError
     
     def list_featuretypes(self, workspace_name):
-        pass
+        raise NotImplementedError
 
