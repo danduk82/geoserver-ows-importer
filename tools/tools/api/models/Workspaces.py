@@ -8,7 +8,7 @@ class Workspaces:
 
     def __init__(self, geoserver_instance) -> None:
         self.geoserver_instance = geoserver_instance
-        self.workspaces = {}  # To store Workspace instances
+        self._workspaces = {}
 
     def endpoint_url(self):
         return f"/workspaces.json"
@@ -50,6 +50,13 @@ class Workspaces:
             return False
         return True
 
+    def find(self, workspace_name):
+        return self.workspaces.get(workspace_name, None)
+    
+    @property
+    def workspaces(self):
+        return self._workspaces
+        
     def parseResponse(self, response):
 
         # Check if the request was successful (status code 200)
@@ -61,10 +68,11 @@ class Workspaces:
 
             # Map the response to a list of Workspace instances
             for ws in json_data.get('workspaces', {}).get('workspace', []):
-                self.workspaces[ws['name']] = ws['href']
+                self._workspaces[ws['name']] = ws['href']
 
             # Now 'workspaces' is a list of Workspace instances
-            for workspace,href in self.workspaces.items():
+            log.debug("Parsed Workspaces:")
+            for workspace,href in self._workspaces.items():
                 log.debug(f"Name: {workspace}, Href: {href}")
         else:
             log.error(f"Error: {response.status_code}")

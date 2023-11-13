@@ -54,11 +54,9 @@ def load_config(args: ap.Namespace)->ScriptConfiguration:
 # - data store name
 
 def createWorkspace(geoserver: GeoserverAPI, workspace: str):
-    workspaces = geoserver.list_workspaces()
-    log.debug(workspaces)
-    if workspace not in workspaces:
-        geoserver.create_workspace(workspace)
-    log.debug(geoserver.list_workspaces())
+    geoserver.create_workspace(workspace)
+    #geoserver.delete_workspace(workspace)
+    raise NotImplementedError
     
 def createDatastore(geoserver: GeoserverAPI, workspace: str, datastore_name: str, config: ScriptConfiguration):
     try:

@@ -4,8 +4,19 @@ import requests
 import logging
 log = logging.getLogger()
 
-class Workspace:
+class Workspace:   
+
+    def __init__(self, geoserver_instance, workspace_name) -> None:
+        self.geoserver_instance = geoserver_instance
+        self.workspace_name = workspace_name
+        self.workspace_info = None
+        
+    def endpoint_url(self):
+        return f"/workspaces/{self.workspace_name}.json"
     
+    def endpoint_url_delete(self, recurse=False):
+        return f"/workspaces/{self.workspace_name}.json?recurse={str(recurse).lower()}"
+
     _responseSchema = {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
@@ -27,12 +38,14 @@ class Workspace:
         "required": ["workspace"]
         }
 
-
-    def __init__(self, geoserver_instance, workspace_name) -> None:
-        self.geoserver_instance = geoserver_instance
-        self.workspace_name = workspace_name
-        self.workspace_info = None
-
+    def post_payload(self, is_isolated=False):
+        return {
+            "workspace": {
+                "name": self.workspace_name,
+                "isolated": is_isolated
+            }
+        }
+        
     def fetch_workspace_response(self):
         url = f"{self.geoserver_instance.rest_url}/workspaces/{self.workspace_name}.json"
         response = requests.get(url, auth=(self.geoserver_instance.username, self.geoserver_instance.password))
