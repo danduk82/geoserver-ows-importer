@@ -107,9 +107,26 @@ class FeatureType:
         "required": ["featureType"]
         }
     
-    def __init__(self) -> None:
-        pass
-    
+    def __init__(self,
+                workspace_name,
+                store_name,
+                layer_name,
+                table_name,
+                feature_type,
+                srs = "EPSG:4326",
+                title = "",
+                abstract = "",
+                keywords = {}) -> None:
+        self.workspace_name = workspace_name
+        self.store_name = store_name
+        self.layer_name = layer_name
+        self.title = title
+        self.table_name = table_name
+        self.feature_type = feature_type
+        self.srs = srs
+        self.abstract = abstract
+        self.keywords = keywords
+        
     @property
     def responseSchema(self):
         return self._responseSchema
@@ -117,11 +134,18 @@ class FeatureType:
     def endpoint_url(self):
         return f"/workspaces/{self.workspace}/featuretypes/{self.featureTypeName}.json"
     
-    def __init__(self, workspace, feature_type_name) -> None:
-        self.featureTypeName = feature_type_name
-        self.workspace = workspace
-        pass
-    
+    def post_payload(self):
+        return {
+            "featureType": {
+                "name": self.layer_name,
+                "nativeName": self.table_name,
+                "title": self.title,
+                "abstract": self.abstract,
+                "srs": self.srs,
+                "keywords": self.keywords                
+            }
+        }
+   
     def validate(self, response):
         try:
             jsonschema.validate(response, self.responseSchema)

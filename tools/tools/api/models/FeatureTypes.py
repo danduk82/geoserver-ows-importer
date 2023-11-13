@@ -11,13 +11,13 @@ class FeatureTypeItem:
 
 class FeatureTypes:
 
-    def __init__(self, geoserver_instance, workspace_name) -> None:
-        self.geoserver_instance = geoserver_instance
+    def __init__(self, workspace_name, data_store_name, featureTypes=None) -> None:
         self.workspace_name = workspace_name
-        self.feature_types = None
+        self.data_store_name = data_store_name
+        self.featureTypes = featureTypes
 
-    def url(self):
-        return f"{self.geoserver_instance.rest_url}/workspaces/{self.workspace_name}/featuretypes.json"
+    def endpoint_url(self):
+        return f"/workspaces/{self.workspace_name}/datastores/{self.data_store_name}/featuretypes.json"
 
     _response_schema = {
         "$schema": "http://json-schema.org/draft-07/schema#",
@@ -50,15 +50,14 @@ class FeatureTypes:
 
     def validate(self, response):
         try:
-            jsonschema.validate(response, self.response_schema)
+            if not response["featureTypes"] == '':
+                jsonschema.validate(response, self.response_schema)
         except jsonschema.exceptions.ValidationError as err:
             print(err)
             return False
         return True
 
-    def fetch_feature_types(self):
-        response = requests.get(self.url(), auth=(self.geoserver_instance.username, self.geoserver_instance.password))
-
+    def parseResponse(self, response):
         # Check if the request was successful (status code 200)
         if response.status_code == 200:
             # Parse the JSON response
@@ -67,10 +66,13 @@ class FeatureTypes:
                 raise Exception("Invalid from featureTypes")
 
             # Map the response to a list of FeatureType instances
-            self.feature_types = [FeatureTypeItem(feature['name'], feature['href']) for feature in json_data.get('featureTypes', {}).get('featureType', [])]
+            try:
+                self.featureTypes = [FeatureTypeItem(feature['name'], feature['href']) for feature in json_data.get('featureTypes', {}).get('featureType', [])]
+            except AttributeError:
+                self.featureTypes = []
 
-            # Now 'feature_types' is a list of FeatureType instances
-            for feature_type in self.feature_types:
+            # Now 'featureTypes' is a list of FeatureType instances
+            for feature_type in self.featureTypes:
                 log.debug(f"Name: {feature_type.name}, Href: {feature_type.href}")
         else:
             log.error(f"Error: {response.status_code}")

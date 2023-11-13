@@ -72,6 +72,10 @@ class DataStore:
     def endpoint_url(self):
         return f"/workspaces/{self.workspace_name}/datastores/{self.data_store_name}.json"
     
+    @property
+    def name(self):
+        return self.data_store_name
+    
     def post_payload(self):
         return {
             "dataStore": {

@@ -98,9 +98,10 @@ class GeoserverAPI:
         database="test",
         username="username",
         password="password",
+        schema="public"
     ):
         if not store_name in self.get_datastores_per_workspace(workspace_name):
-            connectionParameters = {"host": host, "port": port, "database": database, "user": username, "passwd": password, "dbtype": "postgis"}
+            connectionParameters = {"host": host, "port": port, "database": database, "user": username, "passwd": password, "schema": schema, "dbtype": "postgis"}
             newDataStore = DataStore.DataStore(
                 workspace_name,
                 store_name,
@@ -137,13 +138,24 @@ class GeoserverAPI:
         workspace_name,
         store_name,
         layer_name,
-        title,
         table_name,
         feature_type="Point",
         srs="EPSG:3857",
+        title = "",
         abstract=""
     ):
-        raise NotImplementedError
+        if not layer_name in self.get_featuretype_per_datastore(workspace_name, store_name):
+            newFeatureType = FeatureType.FeatureType(
+                workspace_name,
+                store_name,
+                layer_name,
+                table_name,
+                feature_type,
+                srs,
+                title,
+                abstract
+            )
+            self.geoserverRestApi.POST(self.featuretypes[workspace_name][store_name].endpoint_url(), newFeatureType.post_payload())
 
     def delete_featuretype(self, workspace_name, store_name, layer_name):
         raise NotImplementedError
@@ -151,6 +163,29 @@ class GeoserverAPI:
     def get_featuretype(self, workspace_name, store_name, layer_name):
         raise NotImplementedError
     
-    def list_featuretypes(self, workspace_name):
-        raise NotImplementedError
-
+    def _populate_featuretypes(self):
+        self.featuretypes = {}
+        for workspace_name in self.get_workspaces():
+            self.featuretypes[workspace_name] = {}
+            for store in self.get_datastores_per_workspace(workspace_name):
+                store_name = store.name
+                log.debug(f"store_name = {store_name}")
+                self.featuretypes[workspace_name][store_name] = FeatureTypes.FeatureTypes(workspace_name, store_name)
+                response = self.geoserverRestApi.GET(self.featuretypes[workspace_name][store_name].endpoint_url())
+                self.featuretypes[workspace_name][store_name].parseResponse(response)
+                
+    def _refresh_featuretypes_per_workspace(self, workspace_name, store_name):
+        if not hasattr(self, "featuretypes"):
+            self._populate_featuretypes()
+        self.featuretypes[workspace_name][store_name] = FeatureTypes.FeatureTypes(workspace_name, store_name)
+        response = self.geoserverRestApi.GET(self.featuretypes[workspace_name][store_name].endpoint_url())
+        self.featuretypes[workspace_name][store_name].parseResponse(response)
+    
+    def get_featuretypes(self, workspace_name):
+        self._populate_featuretypes()
+        log.debug(f"featureTypes in workspace {workspace_name} = {self.featuretypes}")
+        return self.featuretypes[workspace_name]
+    
+    def get_featuretype_per_datastore(self, workspace_name, store_name):
+        self._refresh_featuretypes_per_workspace(workspace_name, store_name)
+        return self.featuretypes[workspace_name][store_name].featureTypes
