@@ -4,7 +4,7 @@ import os.path
 import requests
 import json
 
-from models import FeatureTypes, DataStores, FeatureType, DataStore
+from .models import FeatureTypes, DataStores, FeatureType, DataStore, Workspaces, Workspace
 
 class GeoserverRestAPI:
     def __init__(self, geoserver_base_url, username, password) -> None:
@@ -63,8 +63,10 @@ class GeoserverAPI:
         pass
 
     def list_workspaces(self):
+        workspaces = Workspaces.Workspaces(self.geoserverRestApi)
+        response = self.geoserverRestApi.GET(workspaces.endpoint_url())
+        workspaces.parseResponse(response)
         
-        pass
 
     def create_datastore(
         self,

@@ -4,19 +4,14 @@ import requests
 import logging
 log = logging.getLogger()
 
-class WorkspaceItem:
-    def __init__(self, name, href):
-        self.name = name
-        self.href = href
-
 class Workspaces:
 
     def __init__(self, geoserver_instance) -> None:
         self.geoserver_instance = geoserver_instance
-        self.workspaces = []  # To store Workspace instances
+        self.workspaces = {}  # To store Workspace instances
 
-    def list_url(self):
-        return f"{self.geoserver_instance.rest_url}/workspaces.json"
+    def endpoint_url(self):
+        return f"/workspaces.json"
 
     _response_schema = {
         "$schema": "http://json-schema.org/draft-07/schema#",
@@ -55,8 +50,7 @@ class Workspaces:
             return False
         return True
 
-    def fetchWorkspaces(self):
-        response = requests.get(self.list_url(), auth=(self.geoserver_instance.username, self.geoserver_instance.password))
+    def parseResponse(self, response):
 
         # Check if the request was successful (status code 200)
         if response.status_code == 200:
@@ -66,10 +60,11 @@ class Workspaces:
                 raise Exception("Invalid response from workspaces")
 
             # Map the response to a list of Workspace instances
-            self.workspaces = [WorkspaceItem(ws['name'], ws['href']) for ws in json_data.get('workspaces', {}).get('workspace', [])]
+            for ws in json_data.get('workspaces', {}).get('workspace', []):
+                self.workspaces[ws['name']] = ws['href']
 
             # Now 'workspaces' is a list of Workspace instances
-            for workspace in self.workspaces:
-                log.debug(f"Name: {workspace.name}, Href: {workspace.href}")
+            for workspace,href in self.workspaces.items():
+                log.debug(f"Name: {workspace}, Href: {href}")
         else:
             log.error(f"Error: {response.status_code}")
