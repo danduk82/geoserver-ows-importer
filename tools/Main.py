@@ -82,6 +82,14 @@ def getLayerMetadata(config: ScriptConfiguration, schema_name: str, table_name: 
     )
     return metadata.getMetadata()
 
+def createWmsLayer(
+        geoserver: GeoserverAPI,
+        workspace: str,
+        datastore_name: str,
+        layerName: str
+        ):
+    pass
+    
 
 def createLayers(
         geoserver: GeoserverAPI,
@@ -99,15 +107,23 @@ def createLayers(
     for sublayer, content in sublayers.items():
         layerName = f"{config.configParser['layer']['layername']}_{sublayer}"
         tableName = content["table_name"]
-        featuretype = content["feature_type"]
         srs = content["srs"]
         geoserver.create_featuretype(
             workspace,
             datastore_name,
             layerName,
             tableName,
-            featuretype,
             srs
+        )
+        createWmsLayer(
+            geoserver,
+            workspace,
+            datastore_name,
+            layerName,
+            tableName,
+            srs,
+            config,
+            inputWmsServer
         )
 
         

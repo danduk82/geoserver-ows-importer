@@ -112,7 +112,6 @@ class FeatureType:
                 store_name,
                 layer_name,
                 table_name,
-                feature_type,
                 srs = "EPSG:4326",
                 title = "",
                 abstract = "",
@@ -122,7 +121,6 @@ class FeatureType:
         self.layer_name = layer_name
         self.title = title
         self.table_name = table_name
-        self.feature_type = feature_type
         self.srs = srs
         self.abstract = abstract
         self.keywords = keywords
