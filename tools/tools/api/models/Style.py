@@ -18,6 +18,27 @@ class Style:
     def endpoint_url(self, style_name):
         return f"/workspaces/{self.workspace}/styles/{style_name}.json"
     
+    def post_payload(self):
+        return {
+            "style": {
+                "name": self.name,
+                "filename": self.filename,
+                "format": self.format,
+                "languageVersion": self.language_version
+            }
+        }
+
+    def put_payload(self):
+        return {
+            "style": {
+                "name": self.name,
+                "filename": self.filename,
+                "format": self.format,
+                "languageVersion": self.language_version
+            }
+        }
+    
+    
     _responseSchema = {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",

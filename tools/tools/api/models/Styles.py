@@ -20,6 +20,7 @@ class Styles:
     def endpoint_url(self):
         return f"/workspaces/{self.workspace}/styles.json"
     
+    
     _responseSchema = {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",

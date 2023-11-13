@@ -115,6 +115,11 @@ def createLayers(
             tableName,
             srs
         )
+        geoserver.create_style(
+            workspace,
+            layerName,
+            content["style_file"]
+        )
         createWmsLayer(
             geoserver,
             workspace,
@@ -126,7 +131,7 @@ def createLayers(
             inputWmsServer
         )
 
-        
+       
 
 def main():
 
@@ -156,6 +161,8 @@ def main():
     createDatastore(geoserver, workspace, datastore_name, config)
     # 
     createLayers(geoserver, workspace, datastore_name, config, inputWmsServer)
+    
+    
     
 # if main script
 if __name__ == '__main__':

@@ -4,8 +4,16 @@ import os.path
 import requests
 import json
 
-from .models import FeatureTypes, DataStores, FeatureType, DataStore, Workspaces, Workspace
-
+from .models import (
+    FeatureTypes,
+    DataStores,
+    FeatureType,
+    DataStore,
+    Workspaces,
+    Workspace,
+    Styles,
+    Style
+)
 
 import logging
 log = logging.getLogger()
@@ -33,16 +41,16 @@ class GeoserverRestAPI:
         log.debug(url)
         return response
     
-    def POST(self, endpoint_url, data):
+    def POST(self, endpoint_url, data, files=None):
         url = self.geoserver_rest_url + endpoint_url
-        response = requests.post(url, auth=(self.username, self.password), headers=self.headers, json=data)
+        response = requests.post(url, auth=(self.username, self.password), headers=self.headers, json=data, files=files)
         log.debug(url)
         log.debug(data)
         return response
     
-    def PUT(self, endpoint_url, data):
+    def PUT(self, endpoint_url, data, files=None):
         url = self.geoserver_rest_url + endpoint_url
-        response = requests.put(url, auth=(self.username, self.password), headers=self.headers, json=data)
+        response = requests.put(url, auth=(self.username, self.password), headers=self.headers, json=data, files=files)
         log.debug(url)
         log.debug(data)
         return response
@@ -189,3 +197,38 @@ class GeoserverAPI:
     def get_featuretype_per_datastore(self, workspace_name, store_name):
         self._refresh_featuretypes_per_workspace(workspace_name, store_name)
         return self.featuretypes[workspace_name][store_name].featureTypes
+
+    def _populate_styles(self):
+        self.styles = {}
+        for workspace_name in self.get_workspaces():
+            self.styles[workspace_name] = Styles.Styles(workspace_name)
+            response = self.geoserverRestApi.GET(self.styles[workspace_name].endpoint_url())
+            self.styles[workspace_name].parseResponse(response)
+    
+    def _refresh_sytles_per_workspace(self, workspace_name):
+        if not hasattr(self, "styles"):
+            self._populate_styles()
+        self.styles[workspace_name] = Styles.Styles(workspace_name)
+        response = self.geoserverRestApi.GET(self.styles[workspace_name].endpoint_url())
+        self.styles[workspace_name].parseResponse(response)
+
+    def get_styles(self, workspace_name):
+        self._refresh_sytles_per_workspace(workspace_name)
+        return self.styles[workspace_name].styles
+        
+    def get_style(self, workspace_name, style_name):
+        raise NotImplementedError
+    
+    def create_style(self, workspace_name, style_name, style_file):
+        fileName = os.path.basename(style_file)
+        newStyle = Style.Style(workspace=workspace_name, name=style_name, format="sld", filename=fileName, language_version="1.0.0")
+        if not style_name in self.get_styles(workspace_name):
+            self.geoserverRestApi.POST(self.styles[workspace_name].endpoint_url(), newStyle.post_payload(), files = {'file': (os.path.basename(style_file), open(style_file, 'rb'))})
+        
+    
+    def delete_style(self, workspace_name, style_name):
+        raise NotImplementedError
+    
+    def update_style(self, workspace_name, style_name, style_file):
+        raise NotImplementedError
+    
