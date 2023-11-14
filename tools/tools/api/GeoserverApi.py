@@ -35,32 +35,42 @@ class GeoserverRestAPI:
             url = url + '/rest'
         return url
     
-    def GET(self, endpoint_url):
-        url = self.geoserver_rest_url + endpoint_url
-        response = requests.get(url, auth=(self.username, self.password), headers=self.headers)
-        log.debug(url)
+    methods_mapping = {
+        "GET": requests.get,
+        "POST": requests.post,
+        "PUT": requests.put,
+        "DELETE": requests.delete
+    }
+    
+    def _render_request_parameters(self, parameters):
+        return "&".join([f"{key}={value}" for key, value in parameters.items()])
+    
+    def _do_request(self, method, endpoint_url, data=None, files=None, headers=None, parameters=None):
+        url = self.geoserver_rest_url + endpoint_url + ("?{}".format(self._render_request_parameters(parameters)) if parameters else "")
+        log.debug(f"url = {url}")
+        log.debug(f"data = {data}")
+        request_headers = self.headers.copy()
+        request_headers.update(headers or {})
+        if request_headers['Content-Type'] != "application/json":
+            if data is not None:
+                data = data.encode('utf-8')
+            response = self.methods_mapping[method](url, auth=(self.username, self.password), headers=request_headers, data=data, files=files)
+        else:
+            response = self.methods_mapping[method](url, auth=(self.username, self.password), headers=request_headers, json=data, files=files)
         return response
     
-    def POST(self, endpoint_url, data, files=None):
-        url = self.geoserver_rest_url + endpoint_url
-        response = requests.post(url, auth=(self.username, self.password), headers=self.headers, json=data, files=files)
-        log.debug(url)
-        log.debug(data)
-        return response
+    def GET(self, endpoint_url, headers=None, parameters=None):
+        return self._do_request("GET", endpoint_url, headers=headers, parameters=parameters)
     
-    def PUT(self, endpoint_url, data, files=None):
-        url = self.geoserver_rest_url + endpoint_url
-        response = requests.put(url, auth=(self.username, self.password), headers=self.headers, json=data, files=files)
-        log.debug(url)
-        log.debug(data)
-        return response
+    def POST(self, endpoint_url, data, files=None, headers=None, parameters=None):
+        return self._do_request("POST", endpoint_url, data, files=files, headers=headers, parameters=parameters)
+
     
-    def DELETE(self, endpoint_url, data=None):
-        url = self.geoserver_rest_url + endpoint_url
-        response = requests.delete(url, auth=(self.username, self.password), headers=self.headers, json=data)
-        log.debug(url)
-        log.debug(data)
-        return response
+    def PUT(self, endpoint_url, data, files=None, headers=None, parameters=None):
+        return self._do_request("PUT", endpoint_url, data, files=files, headers=headers, parameters=parameters)
+        
+    def DELETE(self, endpoint_url, data=None, headers=None, parameters=None):
+        return self._do_request("DELETE", endpoint_url, data, headers=headers, parameters=parameters)
     
     
 class GeoserverAPI:
@@ -220,15 +230,20 @@ class GeoserverAPI:
         raise NotImplementedError
     
     def create_style(self, workspace_name, style_name, style_file):
-        fileName = os.path.basename(style_file)
-        newStyle = Style.Style(workspace=workspace_name, name=style_name, format="sld", filename=fileName, language_version="1.0.0")
+        fileName = os.path.basename(style_file) if style_file else None
+        newStyle = Style.Style(workspace=workspace_name, name=style_name, filename=fileName)
         if not style_name in self.get_styles(workspace_name):
-            self.geoserverRestApi.POST(self.styles[workspace_name].endpoint_url(), newStyle.post_payload(), files = {'file': (os.path.basename(style_file), open(style_file, 'rb'))})
+            self.geoserverRestApi.POST(self.styles[workspace_name].endpoint_url(), newStyle.xml_post_payload(), headers = {"Content-Type": "text/xml"})
         
     
     def delete_style(self, workspace_name, style_name):
         raise NotImplementedError
     
     def update_style(self, workspace_name, style_name, style_file):
-        raise NotImplementedError
-    
+        fileName = os.path.basename(style_file) if style_file else None
+        newStyle = Style.Style(workspace=workspace_name, name=style_name, format="sld", filename=fileName, language_version="1.0.0")
+        request_files = {'files': (os.path.basename(style_file), open(style_file, 'rb'))}
+        log.debug(f"request_files = {request_files}")
+        if not style_name in self.get_styles(workspace_name):
+            self.geoserverRestApi.PUT(newStyle.endpoint_url(), data=None, files = request_files, headers = {"Content-Type": "application/vnd.ogc.sld+xml"}, parameters={"raw": "true"})
+        

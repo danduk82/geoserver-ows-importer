@@ -18,7 +18,7 @@ class Styles:
         
     
     def endpoint_url(self):
-        return f"/workspaces/{self.workspace}/styles.json"
+        return f"/workspaces/{self.workspace}/styles"
     
     
     _responseSchema = {

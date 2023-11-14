@@ -1,6 +1,7 @@
 import jsonschema
 import requests
 import logging
+import xmltodict
 
 log = logging.getLogger()
 
@@ -15,16 +16,14 @@ class Style:
         self.date_created = date_created
         self.date_modified = date_modified
     
-    def endpoint_url(self, style_name):
-        return f"/workspaces/{self.workspace}/styles/{style_name}.json"
+    def endpoint_url(self):
+        return f"/workspaces/{self.workspace}/styles/{self.name}"
     
     def post_payload(self):
         return {
             "style": {
                 "name": self.name,
-                "filename": self.filename,
-                "format": self.format,
-                "languageVersion": self.language_version
+                "filename": self.filename
             }
         }
 
@@ -32,12 +31,15 @@ class Style:
         return {
             "style": {
                 "name": self.name,
-                "filename": self.filename,
-                "format": self.format,
-                "languageVersion": self.language_version
+                "filename": self.filename
             }
         }
     
+    def xml_post_payload(self):
+        return xmltodict.unparse(self.post_payload()).split('\n', 1)[1]
+    
+    def xml_put_payload(self):
+        return xmltodict.unparse(self.put_payload()).split('\n', 1)[1]
     
     _responseSchema = {
         "$schema": "http://json-schema.org/draft-07/schema#",

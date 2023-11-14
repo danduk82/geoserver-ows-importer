@@ -120,15 +120,10 @@ def createLayers(
             layerName,
             content["style_file"]
         )
-        createWmsLayer(
-            geoserver,
+        geoserver.update_style(
             workspace,
-            datastore_name,
             layerName,
-            tableName,
-            srs,
-            config,
-            inputWmsServer
+            content["style_file"]
         )
 
        
