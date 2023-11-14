@@ -6,8 +6,7 @@ log = logging.getLogger()
 
 class Workspaces:
 
-    def __init__(self, geoserver_instance) -> None:
-        self.geoserver_instance = geoserver_instance
+    def __init__(self) -> None:
         self._workspaces = {}
 
     def endpoint_url(self):

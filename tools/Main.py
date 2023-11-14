@@ -99,10 +99,6 @@ def createLayers(
         inputWmsServer: WMSLayerImporter
     ):
     #log.debug(geoserver.list_layers(workspace))
-    try:
-        existing_layers = geoserver.get_featuretypes(workspace)
-    except AttributeError:
-        existing_layers = []
     sublayers = json.loads(config.configParser['layer']['sublayers'])
     for sublayer, content in sublayers.items():
         layerName = f"{config.configParser['layer']['layername']}_{sublayer}"

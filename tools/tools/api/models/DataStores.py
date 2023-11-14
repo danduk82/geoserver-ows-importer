@@ -4,11 +4,6 @@ import requests
 import logging
 log = logging.getLogger()
 
-class DataStoreItem:
-    def __init__(self, name, href):
-        self.name = name
-        self.href = href
-
 
 class DataStores:
     
@@ -68,13 +63,14 @@ class DataStores:
                 raise Exception("Invalid from datastores")
             # Map the response to a list of DataStore instances
             try:
-                self.dataStores = [DataStoreItem(store['name'], store['href']) for store in json_data.get('dataStores', {}).get('dataStore', [])]
+                for store in json_data.get('dataStores', {}).get('dataStore', []):
+                    self.dataStores[store['name']] = store['href']  
             except AttributeError:
-                self.dataStores = []
+                self.dataStores = {}
 
             # Now 'dataStores' is a list of DataStore instances
-            for data_store in self.dataStores:
-                log.debug(f"Name: {data_store.name}, Href: {data_store.href}")
+            for data_store_name, data_store_href in self.dataStores.items():
+                log.debug(f"Name: {data_store_name}, Href: {data_store_href}")
         else:
             log.error(f"Error: {response.status_code}")
 

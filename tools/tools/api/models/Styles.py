@@ -4,11 +4,6 @@ import logging
 
 log = logging.getLogger()
 
-class StyleItem:
-    def __init__(self, name, href):
-        self.name = name
-        self.href = href
-
 
 class Styles:
     
@@ -69,12 +64,13 @@ class Styles:
                 raise Exception("Invalid from styles")
             # Map the response to a list of Style instances
             try:
-                self.styles = [StyleItem(style['name'], style['href']) for style in json_data.get('styles', {}).get('style', [])]
+                for style in json_data.get('styles', {}).get('style', []):
+                    self.styles[style['name']] = style['href']
             except AttributeError:
-                self.styles = []
+                self.styles = {}
 
             # Now 'styles' is a list of Style instances
-            for style in self.styles:
-                log.debug(f"Name: {style.name}, Href: {style.href}")
+            for style_name, style_href in self.styles.items():
+                log.debug(f"Name: {style_name}, Href: {style_href}")
         else:
             log.error(f"Error: {response.status_code}")

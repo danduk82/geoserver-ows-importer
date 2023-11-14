@@ -4,14 +4,10 @@ import requests
 import logging
 log = logging.getLogger()
 
-class FeatureTypeItem:
-    def __init__(self, name, href):
-        self.name = name
-        self.href = href
 
 class FeatureTypes:
 
-    def __init__(self, workspace_name, data_store_name, featureTypes=None) -> None:
+    def __init__(self, workspace_name, data_store_name, featureTypes={}) -> None:
         self.workspace_name = workspace_name
         self.data_store_name = data_store_name
         self.featureTypes = featureTypes
@@ -67,12 +63,13 @@ class FeatureTypes:
 
             # Map the response to a list of FeatureType instances
             try:
-                self.featureTypes = [FeatureTypeItem(feature['name'], feature['href']) for feature in json_data.get('featureTypes', {}).get('featureType', [])]
+                for feature in json_data.get('featureTypes', {}).get('featureType', []):
+                    self.featureTypes[feature['name']] = feature['href']
             except AttributeError:
-                self.featureTypes = []
+                self.featureTypes = {}
 
             # Now 'featureTypes' is a list of FeatureType instances
-            for feature_type in self.featureTypes:
-                log.debug(f"Name: {feature_type.name}, Href: {feature_type.href}")
+            for feature_type_name, feature_type_href in self.featureTypes.items():
+                log.debug(f"Name: {feature_type_name}, Href: {feature_type_href}")
         else:
             log.error(f"Error: {response.status_code}")
