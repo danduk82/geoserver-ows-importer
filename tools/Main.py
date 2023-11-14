@@ -121,6 +121,12 @@ def createLayers(
             layerName,
             content["style_file"]
         )
+        geoserver.update_default_style(
+            workspace,
+            layerName,
+            layerName
+        )
+            
 
        
 

@@ -9,6 +9,10 @@ from .models import (
     DataStores,
     FeatureType,
     DataStore,
+    LayerGroups,
+    LayerGroup,
+    Layers,
+    Layer,
     Workspaces,
     Workspace,
     Styles,
@@ -161,6 +165,29 @@ class GeoserverAPI:
         self._refresh_datastores_per_workspace(workspace_name)
         return self.datastores[workspace_name].dataStores.keys()
     
+    def get_layers_per_workspace(self, workspace_name):
+        log.debug(f"inside method : get_layers_per_datastore")
+        self._refresh_layers_per_workspace(workspace_name)
+        log.debug("self.layers[workspace_name].layers.keys() = {}".format(self.layers[workspace_name].layers))
+        return self.layers[workspace_name].layers.keys()
+    
+    def _refresh_layers_per_workspace(self, workspace_name):
+        log.debug(f"inside method : _refresh_layers_per_workspace")
+        if not hasattr(self, "layers"):
+            self._populate_layers()
+        self.layers[workspace_name] = Layers.Layers(workspace_name)
+        log.info(f"self.layers = {self.layers}")
+        response = self.geoserverRestApi.GET(self.layers[workspace_name].endpoint_url())
+        self.layers[workspace_name].parseResponse(response)
+        
+    def _populate_layers(self):
+        log.debug(f"inside method : _populate_layers")
+        self.layers = {}
+        for workspace_name in self.get_workspaces():
+            self.layers[workspace_name] = Layers.Layers(workspace_name)
+            response = self.geoserverRestApi.GET(self.layers[workspace_name].endpoint_url())
+            self.layers[workspace_name].parseResponse(response)
+    
     def create_featuretype(
         self,
         workspace_name,
@@ -185,6 +212,11 @@ class GeoserverAPI:
                 abstract
             )
             self.geoserverRestApi.POST(self.featuretypes[workspace_name][store_name].endpoint_url(), newFeatureType.post_payload())
+
+    
+    def update_default_style(self, workspace_name, layer_name, style_name):
+        updateLayer = Layer.Layer(workspace_name, layer_name)
+        self.geoserverRestApi.PUT(updateLayer.endpoint_url(), updateLayer.put_payload_style(style_name))
 
     def delete_featuretype(self, workspace_name, store_name, layer_name):
         raise NotImplementedError
