@@ -267,6 +267,5 @@ class GeoserverAPI:
         newStyle = Style.Style(workspace=workspace_name, name=style_name, format="sld", filename=fileName, language_version="1.0.0")
         request_files = {'files': (os.path.basename(style_file), open(style_file, 'rb'))}
         log.debug(f"request_files = {request_files}")
-        if not style_name in self.get_styles(workspace_name):
-            self.geoserverRestApi.PUT(newStyle.endpoint_url(), data=None, files = request_files, headers = {"Content-Type": "application/vnd.ogc.sld+xml"}, parameters={"raw": "true"})
+        self.geoserverRestApi.PUT(newStyle.endpoint_url(), data=None, files = request_files, headers = {"Content-Type": "application/vnd.ogc.sld+xml"}, parameters={"raw": "true"})
         
