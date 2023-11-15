@@ -13,6 +13,7 @@ from .models import (
     LayerGroup,
     Layers,
     Layer,
+    Namespace,
     Workspaces,
     Workspace,
     SettingsWMS,
@@ -301,6 +302,11 @@ class GeoserverAPI:
             data = file_content.read()
         self.geoserverRestApi.PUT(newStyle.endpoint_url(), data=data,  headers = {"Content-Type": "application/vnd.ogc.sld+xml"}, parameters={"raw": "true"})
         
+    def update_namespace(self, workspace_name, uri, isolated="true"):
+        log.debug(f"inside method : update_namespace")
+        updateNamespace = Namespace.Namespace(workspace_name)
+        self.geoserverRestApi.PUT(updateNamespace.endpoint_url(), updateNamespace.put_payload(uri=uri, isolated=isolated))    
+    
     def activate_wms_service(self, workspace_name):
         log.debug(f"inside method : activate_wms_service")
         updateSettingsWMS = SettingsWMS.SettingsWMS(workspace_name)

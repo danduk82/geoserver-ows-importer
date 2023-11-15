@@ -55,6 +55,7 @@ def load_config(args: ap.Namespace)->ScriptConfiguration:
 
 def createWorkspace(geoserver: GeoserverAPI, workspace: str):
     geoserver.create_workspace(workspace)
+    geoserver.update_namespace(workspace, workspace)
     # geoserver.activate_wms_service(workspace)
     # geoserver.activate_wfs_service(workspace)
     
@@ -106,6 +107,7 @@ def createLayers(
         layerName = f"{config.configParser['layer']['layername']}_{sublayer}"
         tableName = content["table_name"]
         srs = content["srs"]
+        style_name = f"{workspace}_{content['style_name']}"
         geoserver.create_featuretype(
             workspace,
             datastore_name,
@@ -130,6 +132,13 @@ def createLayers(
             workspace,
             layerName,
             layerName
+        )
+        geoserver.create_layergroup(
+            workspace,
+            layerName,
+            [layerName],
+            title = inputWmsServer.sublayers[sublayer].title,
+            abstract = inputWmsServer.sublayers[sublayer].abstract
         )
             
 
@@ -159,7 +168,7 @@ def main():
     createWorkspace(geoserver, workspace)
     schema = config.configParser['database']['schema']
     
-    datastore_name = f"pg_{workspace}_{schema}"
+    datastore_name = f"pg_{schema}"
     createDatastore(geoserver, workspace, datastore_name, config)
     # 
     createLayers(geoserver, workspace, datastore_name, config, inputWmsServer)
