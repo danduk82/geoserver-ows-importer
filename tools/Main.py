@@ -4,6 +4,8 @@ from tools.Config import ScriptConfiguration
 from tools.WMSLayerImporter import WMSLayerImporter
 from tools.api.GeoserverApi import GeoserverAPI
 from tools.PGMetadata import PGMetadata
+from tools.domain.GdiDeServiceWMS import GdiDeServiceWMS
+from configparser import ConfigParser
 import json
 
 import logging
@@ -40,24 +42,39 @@ def load_config(args: ap.Namespace)->ScriptConfiguration:
 
 
 # todo
-# - style
-# - keywords
-# - title
-# - layer name
 # - attributes
 # - crs
 # - bounding box
 # - metadata url
 # - abstract
 # - inspire extended capabilities
-# - table name
-# - data store name
+# - LayerGroup
+
+
+def rewrite_csw_id_url(url: str):
+    # for the moment, just return the url
+    return url
 
 def createWorkspace(geoserver: GeoserverAPI, workspace: str):
     geoserver.create_workspace(workspace)
-    #geoserver.update_namespace(workspace, workspace)
-    #raise NotImplementedError
-    #geoserver.activate_wms_service(workspace)
+    geoserver.update_namespace(workspace, workspace)
+    
+def activateServices(geoserver: GeoserverAPI, workspace: str, config: ConfigParser,wms_importer: WMSLayerImporter):
+    overrideMetadataEntries = {}
+    wmsService = GdiDeServiceWMS(
+            workspace=workspace,
+            config=config,
+            keywords=wms_importer.wms.identification.keywords,
+            fees = wms_importer.wms.identification.fees,
+            accessConstraints = wms_importer.wms.identification.accessconstraints,
+            internationalAbstract = wms_importer.wms.identification.abstract,
+            internationalTitle = wms_importer.wms.identification.title,
+            overrideMetadataEntries = {},
+            identifier = rewrite_csw_id_url(wms_importer.inspireCapabilities["inspire_vs:ExtendedCapabilities"]["inspire_common:MetadataUrl"]["inspire_common:URL"])
+        )
+    
+    
+    geoserver.activate_wms_service(workspace, wmsService)
     # geoserver.activate_wfs_service(workspace)
     
 def createDatastore(geoserver: GeoserverAPI, workspace: str, datastore_name: str, config: ScriptConfiguration):
@@ -72,8 +89,7 @@ def createDatastore(geoserver: GeoserverAPI, workspace: str, datastore_name: str
         config.configParser['database']['password'],
         config.configParser['database']['schema']
         )
-    raise NotImplementedError
-    #log.info(geoserver.get_datastore(workspace, store_name=datastore_name))
+    #log.debug(geoserver.get_datastore(workspace, store_name=datastore_name))
 
 def getLayerMetadata(config: ScriptConfiguration, schema_name: str, table_name: str):
     metadata = PGMetadata(
@@ -135,13 +151,13 @@ def createLayers(
             layerName,
             layerName
         )
-        geoserver.create_layergroup(
-            workspace,
-            layerName,
-            [layerName],
-            title = inputWmsServer.sublayers[sublayer].title,
-            abstract = inputWmsServer.sublayers[sublayer].abstract
-        )
+        # geoserver.create_layergroup(
+        #     workspace,
+        #     layerName,
+        #     [layerName],
+        #     title = inputWmsServer.sublayers[sublayer].title,
+        #     abstract = inputWmsServer.sublayers[sublayer].abstract
+        # )
             
 
        
@@ -158,7 +174,6 @@ def main():
         )
     log.debug(inputWmsServer)
     log.debug(inputWmsServer.getInspireExtendedCapabilitiesAsXml())
-    
     geoserver = GeoserverAPI(
         config.configParser['geoserver']['geoserver_url'],
         config.configParser['geoserver']['geoserver_username'],
@@ -167,8 +182,8 @@ def main():
 
     workspace = config.configParser['layer']['workspace']
     createWorkspace(geoserver, workspace)
+    activateServices(geoserver, workspace, config.defaults["wmsservice"], inputWmsServer)
     schema = config.configParser['database']['schema']
-    
     datastore_name = f"pg_{schema}"
     createDatastore(geoserver, workspace, datastore_name, config)
     # 

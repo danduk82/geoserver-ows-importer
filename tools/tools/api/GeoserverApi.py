@@ -307,10 +307,9 @@ class GeoserverAPI:
         updateNamespace = Namespace.Namespace(workspace_name)
         self.geoserverRestApi.PUT(updateNamespace.endpoint_url(), updateNamespace.put_payload(uri=uri, isolated=isolated))    
     
-    def activate_wms_service(self, workspace_name):
+    def activate_wms_service(self, workspace_name, wmsService):
         log.debug(f"inside method : activate_wms_service")
-        updateSettingsWMS = SettingsWMS.SettingsWMS(workspace_name)
-        self.geoserverRestApi.PUT(updateSettingsWMS.endpoint_url(), updateSettingsWMS.put_payload(enabled="true"))
+        self.geoserverRestApi.PUT(wmsService.endpoint_url(), wmsService.put_payload())
         
     def activate_wfs_service(self, workspace_name):
         log.debug(f"inside method : activate_wfs_service")
