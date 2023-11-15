@@ -114,8 +114,8 @@ class SettingsWMS:
             "required": ["wms"]
             }
     
-    def __init__(self, workspace_name) -> None:
-        self.workspace_name = workspace_name
+    def __init__(self, workspace) -> None:
+        self.workspace = workspace
         self.wms = None
 
 
@@ -123,7 +123,7 @@ class SettingsWMS:
         payload = {
             "wms": {
                 "workspace": {
-                    "name": "{self.workspace_name}"
+                    "name": self.workspace
                 },
                 "enabled": enabled,
                 "title": title,

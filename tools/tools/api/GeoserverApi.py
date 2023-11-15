@@ -15,6 +15,8 @@ from .models import (
     Layer,
     Workspaces,
     Workspace,
+    SettingsWMS,
+    SettingsWFS,
     Styles,
     Style
 )
@@ -194,7 +196,6 @@ class GeoserverAPI:
         store_name,
         layer_name,
         table_name,
-        feature_type="Point",
         srs="EPSG:3857",
         title = "",
         abstract=""
@@ -202,14 +203,13 @@ class GeoserverAPI:
         log.debug(f"inside method : create_featuretype")
         if not layer_name in self.get_featuretype_per_datastore(workspace_name, store_name):
             newFeatureType = FeatureType.FeatureType(
-                workspace_name,
-                store_name,
-                layer_name,
-                table_name,
-                feature_type,
-                srs,
-                title,
-                abstract
+                workspace_name=workspace_name,
+                store_name=store_name,
+                layer_name=layer_name,
+                table_name=table_name,
+                srs=srs,
+                title=title,
+                abstract=abstract
             )
             self.geoserverRestApi.POST(self.featuretypes[workspace_name][store_name].endpoint_url(), newFeatureType.post_payload())
 
@@ -301,3 +301,12 @@ class GeoserverAPI:
             data = file_content.read()
         self.geoserverRestApi.PUT(newStyle.endpoint_url(), data=data,  headers = {"Content-Type": "application/vnd.ogc.sld+xml"}, parameters={"raw": "true"})
         
+    def activate_wms_service(self, workspace_name):
+        log.debug(f"inside method : activate_wms_service")
+        updateSettingsWMS = SettingsWMS.SettingsWMS(workspace_name)
+        self.geoserverRestApi.POST(updateSettingsWMS.endpoint_url(), updateSettingsWMS.put_payload(enabled="true"))
+        
+    def activate_wfs_service(self, workspace_name):
+        log.debug(f"inside method : activate_wfs_service")
+        updateSettingsWFS = SettingsWFS.SettingsWFS(workspace_name)
+        self.geoserverRestApi.POST(updateSettingsWFS.endpoint_url(), updateSettingsWFS.put_payload(enabled="true"))

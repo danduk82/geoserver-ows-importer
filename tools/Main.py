@@ -55,6 +55,8 @@ def load_config(args: ap.Namespace)->ScriptConfiguration:
 
 def createWorkspace(geoserver: GeoserverAPI, workspace: str):
     geoserver.create_workspace(workspace)
+    # geoserver.activate_wms_service(workspace)
+    # geoserver.activate_wfs_service(workspace)
     
 def createDatastore(geoserver: GeoserverAPI, workspace: str, datastore_name: str, config: ScriptConfiguration):
 
@@ -109,7 +111,10 @@ def createLayers(
             datastore_name,
             layerName,
             tableName,
-            srs
+            srs,
+            title = inputWmsServer.sublayers[sublayer].title,
+            abstract = inputWmsServer.sublayers[sublayer].abstract
+            
         )
         geoserver.create_style(
             workspace,
