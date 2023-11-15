@@ -24,5 +24,8 @@ class KeyDollarListDict(dict):
     def serialize(self):
         return [{self.key_prefix: key, self.value_prefix: value} for key, value in self.items()]
     
+    def __repr__(self) -> str:
+        return str(self.serialize())
+    
     def __str__(self):
         return json.dumps(self.serialize())
