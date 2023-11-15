@@ -2,6 +2,8 @@
 import jsonschema
 import requests
 
+from .Common import KeyDollarListDict
+
 import logging
 log = logging.getLogger()
 
@@ -66,8 +68,10 @@ class DataStore:
     def __init__(self, workspace_name, data_store_name, connection_parameters, data_store_type="PostGIS") -> None:
         self.workspace_name = workspace_name
         self.data_store_name = data_store_name
-        self.connection_parameters = connection_parameters
+        self.connection_parameters = KeyDollarListDict()
+        self.connection_parameters.update(connection_parameters)
         self.data_store_type = data_store_type
+
         
     def endpoint_url(self):
         return f"/workspaces/{self.workspace_name}/datastores/{self.data_store_name}.json"
@@ -86,9 +90,7 @@ class DataStore:
                     "name": self.workspace_name
                 },
                 "connectionParameters": {
-                    "entry": [
-                        {"@key": key, "$": value} for key, value in self.connection_parameters.items()
-                    ]
+                    "entry": self.connection_parameters.serialize()
                 }
             }
         }
@@ -116,7 +118,7 @@ class DataStore:
             raise Exception("Invalid from data store response")
 
     def parse_connection_parameters(self, json_data):
-        return {entry["@key"]: entry["$"] for entry in json_data.get("dataStore", {}).get("connectionParameters", {}).get("entry", [])}
+        return KeyDollarListDict(json_data.get("dataStore", {}).get("connectionParameters", {}).get("entry", []))
 
     @property
     def responseSchema(self):

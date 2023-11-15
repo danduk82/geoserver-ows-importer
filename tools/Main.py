@@ -55,8 +55,9 @@ def load_config(args: ap.Namespace)->ScriptConfiguration:
 
 def createWorkspace(geoserver: GeoserverAPI, workspace: str):
     geoserver.create_workspace(workspace)
-    geoserver.update_namespace(workspace, workspace)
-    # geoserver.activate_wms_service(workspace)
+    #geoserver.update_namespace(workspace, workspace)
+    #raise NotImplementedError
+    #geoserver.activate_wms_service(workspace)
     # geoserver.activate_wfs_service(workspace)
     
 def createDatastore(geoserver: GeoserverAPI, workspace: str, datastore_name: str, config: ScriptConfiguration):
@@ -71,6 +72,7 @@ def createDatastore(geoserver: GeoserverAPI, workspace: str, datastore_name: str
         config.configParser['database']['password'],
         config.configParser['database']['schema']
         )
+    raise NotImplementedError
     #log.info(geoserver.get_datastore(workspace, store_name=datastore_name))
 
 def getLayerMetadata(config: ScriptConfiguration, schema_name: str, table_name: str):
