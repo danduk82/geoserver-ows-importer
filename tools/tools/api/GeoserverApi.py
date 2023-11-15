@@ -59,7 +59,7 @@ class GeoserverRestAPI:
         request_headers = self.headers.copy()
         request_headers.update(headers or {})
         if request_headers['Content-Type'] != "application/json":
-            if data is not None:
+            if (data is not None) and (type(data) != bytes):
                 data = data.encode('utf-8')
             response = self._methods_mapping[method](url, auth=(self.username, self.password), headers=request_headers, data=data, files=files)
         else:
@@ -297,7 +297,7 @@ class GeoserverAPI:
         log.debug(f"inside method : update_style")
         fileName = os.path.basename(style_file) if style_file else None
         newStyle = Style.Style(workspace=workspace_name, name=style_name, format="sld", filename=fileName, language_version="1.0.0")
-        request_files = {'files': (os.path.basename(style_file), open(style_file, 'rb'))}
-        log.debug(f"request_files = {request_files}")
-        self.geoserverRestApi.PUT(newStyle.endpoint_url(), data=None, files = request_files, headers = {"Content-Type": "application/vnd.ogc.sld+xml"}, parameters={"raw": "true"})
+        with open(style_file, 'rb') as file_content:
+            data = file_content.read()
+        self.geoserverRestApi.PUT(newStyle.endpoint_url(), data=data,  headers = {"Content-Type": "application/vnd.ogc.sld+xml"}, parameters={"raw": "true"})
         

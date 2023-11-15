@@ -145,15 +145,15 @@ class LayerGroup:
     def __init__(self,
                 workspace_name,
                 layer_group_name,
-                table_name,
+                layers_list,
                 srs = "EPSG:4326",
                 title = "",
                 abstract = "",
                 keywords = {}) -> None:
         self.workspace_name = workspace_name
         self.layer_group_name = layer_group_name
+        self.layers_list = layers_list
         self.title = title
-        self.table_name = table_name
         self.srs = srs
         self.abstract = abstract
         self.keywords = keywords
@@ -169,7 +169,6 @@ class LayerGroup:
         return {
             "layerGroup": {
                 "name": self.layer_group_name,
-                "nativeName": self.table_name,
                 "title": self.title,
                 "abstract": self.abstract,
                 "srs": self.srs,
