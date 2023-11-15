@@ -150,9 +150,6 @@ def main():
 
     args = parse_args()
     config = load_config(args)
-    # print(config.configParser.sections())
-    log.debug(config.defaults['wmsservice']['full_content'])
-    raise NotImplementedError
     
     inputWmsServer = WMSLayerImporter(
         config.configParser['fis_broker']['url'], 
