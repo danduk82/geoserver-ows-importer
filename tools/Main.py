@@ -1,5 +1,6 @@
 #!/bin/env python3
 import argparse as ap
+from urllib.parse import urlparse, parse_qs
 from tools.Config import ScriptConfiguration
 from tools.WMSLayerImporter import WMSLayerImporter
 from tools.api.GeoserverApi import GeoserverAPI
@@ -50,10 +51,22 @@ def load_config(args: ap.Namespace)->ScriptConfiguration:
 # - inspire extended capabilities
 # - LayerGroup
 
+def convert_keys_to_lowercase(input_dict):
+    return {key.lower(): value for key, value in input_dict.items()}
 
-def rewrite_csw_id_url(url: str):
+def rewrite_csw_id_url(url: str, config: ConfigParser):
+    parsed_url = urlparse(url)
+    query_params = convert_keys_to_lowercase(parse_qs(parsed_url.query, keep_blank_values=True))
+
+    new_query_params = {}
+    for param, value in config['inspire'].items():
+        if param != "host":
+            new_query_params[param] = value
+    new_query_params['id'] = query_params['id'][0]
+    params_string = "&".join([f"{key}={value}" for key, value in new_query_params.items()])        
+    rewrited_url = f"{config['inspire']['host']}?{params_string}"
     # for the moment, just return the url
-    return url
+    return rewrited_url
 
 def createWorkspace(geoserver: GeoserverAPI, workspace: str):
     geoserver.create_workspace(workspace)
@@ -63,14 +76,19 @@ def activateServices(geoserver: GeoserverAPI, workspace: str, config: ConfigPars
     overrideMetadataEntries = {}
     wmsService = GdiDeServiceWMS(
             workspace=workspace,
-            config=config,
+            config=config["wmsservice"],
             keywords=wms_importer.wms.identification.keywords,
             fees = wms_importer.wms.identification.fees,
             accessConstraints = wms_importer.wms.identification.accessconstraints,
             internationalAbstract = wms_importer.wms.identification.abstract,
             internationalTitle = wms_importer.wms.identification.title,
-            overrideMetadataEntries = {},
-            identifier = rewrite_csw_id_url(wms_importer.inspireCapabilities["inspire_vs:ExtendedCapabilities"]["inspire_common:MetadataUrl"]["inspire_common:URL"])
+            overrideMetadataEntries = {
+                "inspire.metadataURL": rewrite_csw_id_url(
+                        wms_importer.inspireCapabilities["inspire_vs:ExtendedCapabilities"]["inspire_common:MetadataUrl"]["inspire_common:URL"],
+                        config
+                    )
+                },
+            identifier = ""
         )
     
     
@@ -182,7 +200,7 @@ def main():
 
     workspace = config.configParser['layer']['workspace']
     createWorkspace(geoserver, workspace)
-    activateServices(geoserver, workspace, config.defaults["wmsservice"], inputWmsServer)
+    activateServices(geoserver, workspace, config.defaults, inputWmsServer)
     schema = config.configParser['database']['schema']
     datastore_name = f"pg_{schema}"
     createDatastore(geoserver, workspace, datastore_name, config)
