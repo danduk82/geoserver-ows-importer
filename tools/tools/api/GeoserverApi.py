@@ -191,6 +191,46 @@ class GeoserverAPI:
             response = self.geoserverRestApi.GET(self.layers[workspace_name].endpoint_url())
             self.layers[workspace_name].parseResponse(response)
     
+    def _populate_layergroups(self):
+        log.debug(f"inside method : _populate_layergroups")
+        self.layergroups = {}
+        for workspace_name in self.get_workspaces():
+            self.layergroups[workspace_name] = LayerGroups.LayerGroups(workspace_name)
+            response = self.geoserverRestApi.GET(self.layergroups[workspace_name].endpoint_url())
+            self.layergroups[workspace_name].parseResponse(response)
+    
+    def _refresh_layergroups_per_workspace(self, workspace_name):
+        log.debug(f"inside method : _refresh_layergroups_per_workspace")
+        if not hasattr(self, "layergroups"):
+            self._populate_layergroups()
+        self.layergroups[workspace_name] = LayerGroups.LayerGroups(workspace_name)
+        response = self.geoserverRestApi.GET(self.layergroups[workspace_name].endpoint_url())
+        self.layergroups[workspace_name].parseResponse(response)
+    
+    def get_layergroups_per_workspace(self, workspace_name):
+        log.debug(f"inside method : get_layergroups_per_workspace")
+        self._refresh_layergroups_per_workspace(workspace_name)
+        return self.layergroups[workspace_name].layerGroups.keys()
+    
+    def create_layergroup(self, workspace_name, layergroup_name, layer_names, internationalTitle, internationalAbstract, metadataLinksIdentifier):
+        log.debug(f"inside method : create_layergroup")
+        if not layergroup_name in self.get_layergroups_per_workspace(workspace_name):
+            newLayerGroup = LayerGroup.LayerGroup(workspace_name, layergroup_name, layer_names)
+            self.geoserverRestApi.POST(self.layergroups[workspace_name].endpoint_url(), newLayerGroup.post_payload())
+        layers_list = [ Layer.Layer(workspace_name, layer_name) for layer_name in layer_names ]
+        styles_list = [ Style.Style(workspace_name, layer_name) for layer_name in layer_names ]
+        newLayerGroup = LayerGroup.LayerGroup(
+                workspace_name,
+                layergroup_name,
+                layers_list,
+                styles_list,
+                internationalAbstract=internationalAbstract,
+                internationalTitle=internationalTitle,
+                metadataLinksIdentifier=metadataLinksIdentifier
+            )
+        self.geoserverRestApi.POST(self.layergroups[workspace_name].endpoint_url(), newLayerGroup.post_payload())
+
+    
     def create_featuretype(
         self,
         workspace_name,

@@ -17,7 +17,7 @@ class Style:
         self.date_modified = date_modified
     
     def endpoint_url(self):
-        return f"/workspaces/{self.workspace}/styles/{self.name}"
+        return f"/workspaces/{self.workspace}/styles/{self.name}.json"
     
     def post_payload(self):
         return {
@@ -33,6 +33,12 @@ class Style:
                 "name": self.name,
                 "filename": self.filename
             }
+        }
+    
+    def toListItem(self):
+        return {
+            "name" : f"{self.workspace}:{self.name}",
+            "href" : self.endpoint_url()
         }
     
     def xml_post_payload(self):

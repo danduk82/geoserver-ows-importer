@@ -94,6 +94,14 @@ class Layer:
     def endpoint_url(self):
         return f"/workspaces/{self.workspace}/layers/{self.layer_name}.json"
     
+    def toListItem(self):
+        return {
+            "@type": "layer",
+            "name" : f"{self.workspace}:{self.layer_name}",
+            "href" : self.endpoint_url()
+        }
+    
+    
     def put_payload_style(self, style_name):
         return {
             "layer": {

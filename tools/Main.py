@@ -3,7 +3,9 @@ import argparse as ap
 from urllib.parse import urlparse, parse_qs
 from tools.Config import ScriptConfiguration
 from tools.WMSLayerImporter import WMSLayerImporter
+from tools.WFSLayerImporter import WFSLayerImporter
 from tools.api.GeoserverApi import GeoserverAPI
+from tools.api.models.Layer import Layer
 from tools.PGMetadata import PGMetadata
 from tools.domain.GdiDeServiceWMS import GdiDeServiceWMS
 from configparser import ConfigParser
@@ -72,7 +74,7 @@ def createWorkspace(geoserver: GeoserverAPI, workspace: str):
     geoserver.create_workspace(workspace)
     geoserver.update_namespace(workspace, workspace)
     
-def activateServices(geoserver: GeoserverAPI, workspace: str, config: ConfigParser,wms_importer: WMSLayerImporter):
+def activateWmsServices(geoserver: GeoserverAPI, workspace: str, config: ConfigParser,wms_importer: WMSLayerImporter):
     overrideMetadataEntries = {}
     try:
         # The identifier is not always available
@@ -98,7 +100,10 @@ def activateServices(geoserver: GeoserverAPI, workspace: str, config: ConfigPars
     
     
     geoserver.activate_wms_service(workspace, wmsService)
+    
+def activateWfsServices(geoserver: GeoserverAPI, workspace: str, config: ConfigParser, wfs_importer: WFSLayerImporter):
     # geoserver.activate_wfs_service(workspace)
+    raise NotImplementedError
     
 def createDatastore(geoserver: GeoserverAPI, workspace: str, datastore_name: str, config: ScriptConfiguration):
 
@@ -144,8 +149,11 @@ def createLayers(
     ):
     #log.debug(geoserver.list_layers(workspace))
     sublayers = json.loads(config.configParser['layer']['sublayers'])
+    sublayers_list = []
+    layergroup_name = config.configParser['layer']['layername']
     for sublayer, content in sublayers.items():
         layerName = f"{config.configParser['layer']['layername']}_{sublayer}"
+        sublayers_list.append(Layer(workspace, layerName))
         tableName = content["table_name"]
         srs = content["srs"]
         style_name = f"{workspace}_{content['style_name']}"
@@ -174,13 +182,14 @@ def createLayers(
             layerName,
             layerName
         )
-        # geoserver.create_layergroup(
-        #     workspace,
-        #     layerName,
-        #     [layerName],
-        #     title = inputWmsServer.sublayers[sublayer].title,
-        #     abstract = inputWmsServer.sublayers[sublayer].abstract
-        # )
+    geoserver.create_layergroup(
+        workspace_name=workspace,
+        layergroup_name=layergroup_name,
+        layer_names=sublayers_list,
+        internationalTitle=inputWmsServer.wms.contents[layergroup_name].title,
+        internationalAbstract=inputWmsServer.wms.contents[layergroup_name].abstract,
+        metadataLinksIdentifier=rewrite_csw_id_url(inputWmsServer.wms.contents[layergroup_name].metadataUrls[0]['url'], config.defaults),
+    )
             
 
        
@@ -205,7 +214,7 @@ def main():
 
     workspace = config.configParser['layer']['workspace']
     createWorkspace(geoserver, workspace)
-    activateServices(geoserver, workspace, config.defaults, inputWmsServer)
+    activateWmsServices(geoserver, workspace, config.defaults, inputWmsServer)
     schema = config.configParser['database']['schema']
     datastore_name = f"pg_{schema}"
     createDatastore(geoserver, workspace, datastore_name, config)

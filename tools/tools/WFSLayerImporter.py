@@ -1,8 +1,10 @@
 from owslib.wfs import WebFeatureService
 from lxml import etree
-from api.GeoserverApi import GeoserverAPI
+from .api.GeoserverApi import GeoserverAPI
 import xmltodict
 import json
+
+import logging
 
 import logging
 
