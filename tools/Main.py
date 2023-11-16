@@ -74,6 +74,11 @@ def createWorkspace(geoserver: GeoserverAPI, workspace: str):
     
 def activateServices(geoserver: GeoserverAPI, workspace: str, config: ConfigParser,wms_importer: WMSLayerImporter):
     overrideMetadataEntries = {}
+    try:
+        # The identifier is not always available
+        identifier = wms_importer.inspireCapabilities["inspire_vs:ExtendedCapabilities"]["inspire_dls:SpatialDataSetIdentifier"]["inspire_common:Code"]
+    except:
+        identifier = ""
     wmsService = GdiDeServiceWMS(
             workspace=workspace,
             config=config["wmsservice"],
@@ -88,7 +93,7 @@ def activateServices(geoserver: GeoserverAPI, workspace: str, config: ConfigPars
                         config
                     )
                 },
-            identifier = ""
+            identifier = identifier
         )
     
     
