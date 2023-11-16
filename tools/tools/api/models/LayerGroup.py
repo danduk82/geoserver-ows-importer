@@ -148,7 +148,7 @@ class LayerGroup:
     def __init__(self,
                 workspace_name,
                 layer_group_name,
-                layers_list : list[Layer] = [],
+                layers : list[Layer] = [],
                 styles : list[Style] = [],
                 crs = {"@class": "projected", "$": "EPSG:25833"},
                 bbox = {
@@ -163,7 +163,10 @@ class LayerGroup:
                 keywords = {}) -> None:
         self.workspace = workspace_name
         self.name = layer_group_name
-        self.layers_list_items = self.layerList2layerListItem(layers_list)
+        log.debug(f"LayerGroup: {self.name}")
+        log.debug(f"layers = {layers}")
+        log.debug(f"layers: {layers[0].toListItem()}")
+        self.layers_list_items = self.layerList2layerListItem(layers)
         self.styles_list_items = self.stylesList2styleListItem(styles)
         self.metadataLinksIdentifier = metadataLinksIdentifier
         self.crs = crs

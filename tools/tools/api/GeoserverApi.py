@@ -215,20 +215,19 @@ class GeoserverAPI:
     def create_layergroup(self, workspace_name, layergroup_name, layer_names, internationalTitle, internationalAbstract, metadataLinksIdentifier):
         log.debug(f"inside method : create_layergroup")
         if not layergroup_name in self.get_layergroups_per_workspace(workspace_name):
-            newLayerGroup = LayerGroup.LayerGroup(workspace_name, layergroup_name, layer_names)
+            layers_list = [ Layer.Layer(workspace_name, layer_name) for layer_name in layer_names ]
+            log.debug(f"layers_list = {layers_list}")
+            styles_list = [ Style.Style(workspace_name, layer_name) for layer_name in layer_names ]
+            newLayerGroup = LayerGroup.LayerGroup(
+                    workspace_name,
+                    layergroup_name,
+                    layers_list,
+                    styles_list,
+                    internationalAbstract=internationalAbstract,
+                    internationalTitle=internationalTitle,
+                    metadataLinksIdentifier=metadataLinksIdentifier
+                )
             self.geoserverRestApi.POST(self.layergroups[workspace_name].endpoint_url(), newLayerGroup.post_payload())
-        layers_list = [ Layer.Layer(workspace_name, layer_name) for layer_name in layer_names ]
-        styles_list = [ Style.Style(workspace_name, layer_name) for layer_name in layer_names ]
-        newLayerGroup = LayerGroup.LayerGroup(
-                workspace_name,
-                layergroup_name,
-                layers_list,
-                styles_list,
-                internationalAbstract=internationalAbstract,
-                internationalTitle=internationalTitle,
-                metadataLinksIdentifier=metadataLinksIdentifier
-            )
-        self.geoserverRestApi.POST(self.layergroups[workspace_name].endpoint_url(), newLayerGroup.post_payload())
 
     
     def create_featuretype(

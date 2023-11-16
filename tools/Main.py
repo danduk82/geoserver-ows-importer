@@ -153,7 +153,7 @@ def createLayers(
     layergroup_name = config.configParser['layer']['layername']
     for sublayer, content in sublayers.items():
         layerName = f"{config.configParser['layer']['layername']}_{sublayer}"
-        sublayers_list.append(Layer(workspace, layerName))
+        sublayers_list.append(layerName)
         tableName = content["table_name"]
         srs = content["srs"]
         style_name = f"{workspace}_{content['style_name']}"
