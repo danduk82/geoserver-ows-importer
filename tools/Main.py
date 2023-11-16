@@ -186,8 +186,8 @@ def createLayers(
         workspace_name=workspace,
         layergroup_name=layergroup_name,
         layer_names=sublayers_list,
-        internationalTitle=inputWmsServer.wms.contents[layergroup_name].title,
-        internationalAbstract=inputWmsServer.wms.contents[layergroup_name].abstract,
+        internationalTitle={config.defaults['inspire']['default_language']: inputWmsServer.wms.contents[layergroup_name].title},
+        internationalAbstract={config.defaults['inspire']['default_language']: inputWmsServer.wms.contents[layergroup_name].abstract},
         metadataLinksIdentifier=rewrite_csw_id_url(inputWmsServer.wms.contents[layergroup_name].metadataUrls[0]['url'], config.defaults),
     )
             
