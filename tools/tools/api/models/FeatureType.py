@@ -113,16 +113,16 @@ class FeatureType:
                 layer_name,
                 table_name,
                 srs = "EPSG:4326",
-                title = "",
-                abstract = "",
+                internationalTitle = {"de-DE": "change-me - title"},
+                internationalAbstract = {"de-DE": "change-me - abstract"},
                 keywords = {}) -> None:
         self.workspace_name = workspace_name
         self.store_name = store_name
         self.layer_name = layer_name
-        self.title = title
+        self.internationalTitle = internationalTitle
+        self.internationalAbstract = internationalAbstract
         self.table_name = table_name
         self.srs = srs
-        self.abstract = abstract
         self.keywords = keywords
         
     @property
@@ -137,8 +137,8 @@ class FeatureType:
             "featureType": {
                 "name": self.layer_name,
                 "nativeName": self.table_name,
-                "title": self.title,
-                "abstract": self.abstract,
+                "internationalTitle": self.internationalTitle,
+                "internationalAbstract": self.internationalAbstract,
                 "srs": self.srs,
                 "keywords": self.keywords                
             }

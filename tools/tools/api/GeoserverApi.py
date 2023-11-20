@@ -248,8 +248,8 @@ class GeoserverAPI:
                 layer_name=layer_name,
                 table_name=table_name,
                 srs=srs,
-                title=title,
-                abstract=abstract
+                internationalTitle= {"de-DE": title},
+                internationalAbstract={"de-DE": abstract}
             )
             self.geoserverRestApi.POST(self.featuretypes[workspace_name][store_name].endpoint_url(), newFeatureType.post_payload())
 
