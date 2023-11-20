@@ -119,7 +119,7 @@ def createDatastore(geoserver: GeoserverAPI, workspace: str, datastore_name: str
         )
     #log.debug(geoserver.get_datastore(workspace, store_name=datastore_name))
 
-def getLayerMetadata(config: ScriptConfiguration, schema_name: str, table_name: str):
+def getLayerPostGisMetadata(config: ScriptConfiguration, schema_name: str, table_name: str):
     metadata = PGMetadata(
         schema_name,
         table_name,
@@ -172,6 +172,15 @@ def createLayers(
             layerName,
             content["style_file"]
         )
+        log.debug(f"legend_url={inputWmsServer.sublayers[sublayer].styles['inspire_common:DEFAULT']['legend']}")
+        log.debug(f"legend_format={inputWmsServer.sublayers[sublayer].styles['inspire_common:DEFAULT']['legend_format']}")
+        geoserver.update_style_legend(
+            workspace,
+            layerName,
+            content["style_file"],
+            legend_url=inputWmsServer.sublayers[sublayer].styles['inspire_common:DEFAULT']['legend'],
+            legend_format=inputWmsServer.sublayers[sublayer].styles['inspire_common:DEFAULT']['legend_format']
+        )
         geoserver.update_style(
             workspace,
             layerName,
@@ -182,14 +191,18 @@ def createLayers(
             layerName,
             layerName
         )
-    geoserver.create_layergroup(
-        workspace_name=workspace,
-        layergroup_name=layergroup_name,
-        layer_names=sublayers_list,
-        internationalTitle={config.defaults['inspire']['default_language']: inputWmsServer.wms.contents[layergroup_name].title},
-        internationalAbstract={config.defaults['inspire']['default_language']: inputWmsServer.wms.contents[layergroup_name].abstract},
-        metadataLinksIdentifier=rewrite_csw_id_url(inputWmsServer.wms.contents[layergroup_name].metadataUrls[0]['url'], config.defaults),
-    )
+        raise
+
+            
+            
+    # geoserver.create_layergroup(
+    #     workspace_name=workspace,
+    #     layergroup_name=layergroup_name,
+    #     layer_names=sublayers_list,
+    #     internationalTitle={config.defaults['inspire']['default_language']: inputWmsServer.wms.contents[layergroup_name].title},
+    #     internationalAbstract={config.defaults['inspire']['default_language']: inputWmsServer.wms.contents[layergroup_name].abstract},
+    #     metadataLinksIdentifier=rewrite_csw_id_url(inputWmsServer.wms.contents[layergroup_name].metadataUrls[0]['url'], config.defaults),
+    # )
             
 
        

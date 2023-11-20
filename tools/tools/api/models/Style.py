@@ -7,7 +7,18 @@ log = logging.getLogger()
 
 class Style:
     
-    def __init__(self, workspace, name=None, format=None, language_version=None, filename=None, date_created=None, date_modified=None) -> None:
+    def __init__(
+            self,
+            workspace,
+            name=None,
+            format=None,
+            language_version=None,
+            filename=None,
+            date_created=None,
+            date_modified=None,
+            legend_url=None,
+            legend_format=None
+        ) -> None:
         self.workspace = workspace
         self.name = name
         self.format = format
@@ -15,6 +26,14 @@ class Style:
         self.filename = filename
         self.date_created = date_created
         self.date_modified = date_modified
+        self.create_legend(legend_url, legend_format)
+    
+    def create_legend(self, url, image_format):
+        self.legend = {}
+        if url:
+            self.legend["onlineResource"] = url
+        if image_format:
+            self.legend['format'] = image_format
     
     def endpoint_url(self):
         return f"/workspaces/{self.workspace}/styles/{self.name}.json"
@@ -23,17 +42,21 @@ class Style:
         return {
             "style": {
                 "name": self.name,
-                "filename": self.filename
+                "filename": self.filename,
             }
         }
+        
 
     def put_payload(self):
+        log.debug(f"put_payload: legend = {self.legend}")
         return {
             "style": {
                 "name": self.name,
-                "filename": self.filename
+                "filename": self.filename,
+                "legend": self.legend
             }
         }
+        
     
     def toListItem(self):
         return {

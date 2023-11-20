@@ -101,7 +101,7 @@ class Layer:
             "href" : self.endpoint_url()
         }
     
-    
+   
     def put_payload_style(self, style_name):
         return {
             "layer": {

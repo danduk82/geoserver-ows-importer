@@ -327,11 +327,16 @@ class GeoserverAPI:
         fileName = os.path.basename(style_file) if style_file else None
         newStyle = Style.Style(workspace=workspace_name, name=style_name, filename=fileName)
         if not style_name in self.get_styles(workspace_name):
-            self.geoserverRestApi.POST(self.styles[workspace_name].endpoint_url(), newStyle.xml_post_payload(), headers = {"Content-Type": "text/xml"})
-        
+            self.geoserverRestApi.POST(self.styles[workspace_name].endpoint_url(), newStyle.xml_post_payload(), headers = {"Content-Type": "text/xml"})        
     
     def delete_style(self, workspace_name, style_name):
         raise NotImplementedError
+    
+    def update_style_legend(self, workspace_name, style_name, style_file, legend_url=None, legend_format=None):
+        log.debug(f"inside method : update_style_legend")
+        fileName = os.path.basename(style_file) if style_file else None
+        updateStyle = Style.Style(workspace_name, style_name, filename=fileName, legend_url=legend_url, legend_format=legend_format)
+        self.geoserverRestApi.PUT(updateStyle.endpoint_url(), updateStyle.xml_put_payload(), headers = {"Content-Type": "text/xml"})
     
     def update_style(self, workspace_name, style_name, style_file):
         log.debug(f"inside method : update_style")
