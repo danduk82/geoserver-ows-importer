@@ -79,7 +79,7 @@ class Layer:
                 srs = "EPSG:4326",
                 title = "",
                 abstract = "",
-                keywords = {}) -> None:
+                keywords = {"string":[]}) -> None:
         self.workspace = workspace_name
         self.layer_name = layer_name
         self.title = title

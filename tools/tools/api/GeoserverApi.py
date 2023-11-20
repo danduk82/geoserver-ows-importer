@@ -238,7 +238,8 @@ class GeoserverAPI:
         table_name,
         srs="EPSG:3857",
         title = "",
-        abstract=""
+        abstract="",
+        keywords = {"string": []}
     ):
         log.debug(f"inside method : create_featuretype")
         if not layer_name in self.get_featuretype_per_datastore(workspace_name, store_name):
@@ -249,7 +250,8 @@ class GeoserverAPI:
                 table_name=table_name,
                 srs=srs,
                 internationalTitle= {"de-DE": title},
-                internationalAbstract={"de-DE": abstract}
+                internationalAbstract={"de-DE": abstract},
+                keywords=keywords
             )
             self.geoserverRestApi.POST(self.featuretypes[workspace_name][store_name].endpoint_url(), newFeatureType.post_payload())
 

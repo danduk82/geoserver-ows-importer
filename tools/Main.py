@@ -164,7 +164,8 @@ def createLayers(
             tableName,
             srs,
             title = inputWmsServer.sublayers[sublayer].title,
-            abstract = inputWmsServer.sublayers[sublayer].abstract
+            abstract = inputWmsServer.sublayers[sublayer].abstract,
+            keywords = {"string": inputWmsServer.sublayers[sublayer].keywords}
             
         )
         geoserver.create_style(
@@ -191,7 +192,7 @@ def createLayers(
             layerName,
             layerName
         )
-        raise
+
 
             
             

@@ -133,6 +133,7 @@ class FeatureType:
         return f"/workspaces/{self.workspace}/featuretypes/{self.featureTypeName}.json"
     
     def post_payload(self):
+        log.debug(f"post_payload: keywords = {self.keywords}")
         return {
             "featureType": {
                 "name": self.layer_name,
