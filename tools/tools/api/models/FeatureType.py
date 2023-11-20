@@ -115,7 +115,9 @@ class FeatureType:
                 srs = "EPSG:4326",
                 internationalTitle = {"de-DE": "change-me - title"},
                 internationalAbstract = {"de-DE": "change-me - abstract"},
-                keywords = {}) -> None:
+                keywords = {},
+                disabled_services=[]
+                ) -> None:
         self.workspace_name = workspace_name
         self.store_name = store_name
         self.layer_name = layer_name
@@ -124,6 +126,7 @@ class FeatureType:
         self.table_name = table_name
         self.srs = srs
         self.keywords = keywords
+        self.disabled_services = disabled_services
         
     @property
     def responseSchema(self):
@@ -134,7 +137,7 @@ class FeatureType:
     
     def post_payload(self):
         log.debug(f"post_payload: keywords = {self.keywords}")
-        return {
+        payload = {
             "featureType": {
                 "name": self.layer_name,
                 "nativeName": self.table_name,
@@ -144,6 +147,10 @@ class FeatureType:
                 "keywords": self.keywords                
             }
         }
+        if self.disabled_services != []:
+            payload["featureType"]["serviceConfiguration"] = True
+            payload["featureType"]["disabledServices"] = { "string" : self.disabled_services}
+        return payload
    
     def validate(self, response):
         try:

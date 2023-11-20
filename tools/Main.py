@@ -157,6 +157,8 @@ def createLayers(
         tableName = content["table_name"]
         srs = content["srs"]
         style_name = f"{workspace}_{content['style_name']}"
+        disabled_services = config.configParser['layer']['disabled_services'].split(",") if config.configParser['layer']['disabled_services'] else []
+        log.debug(f"disabled_services={disabled_services}")
         geoserver.create_featuretype(
             workspace,
             datastore_name,
@@ -165,8 +167,8 @@ def createLayers(
             srs,
             title = inputWmsServer.sublayers[sublayer].title,
             abstract = inputWmsServer.sublayers[sublayer].abstract,
-            keywords = {"string": inputWmsServer.sublayers[sublayer].keywords}
-            
+            keywords = {"string": inputWmsServer.sublayers[sublayer].keywords},
+            disabled_services = disabled_services
         )
         geoserver.create_style(
             workspace,
