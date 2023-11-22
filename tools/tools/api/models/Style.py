@@ -17,7 +17,9 @@ class Style:
             date_created=None,
             date_modified=None,
             legend_url=None,
-            legend_format=None
+            legend_format=None,
+            legend_width=None,
+            legend_height=None
         ) -> None:
         self.workspace = workspace
         self.name = name
@@ -26,14 +28,18 @@ class Style:
         self.filename = filename
         self.date_created = date_created
         self.date_modified = date_modified
-        self.create_legend(legend_url, legend_format)
+        self.create_legend(legend_url, legend_format, legend_width, legend_height)
     
-    def create_legend(self, url, image_format):
+    def create_legend(self, url, image_format, width, height):
         self.legend = {}
         if url:
             self.legend["onlineResource"] = url
         if image_format:
             self.legend['format'] = image_format
+        if width:
+            self.legend['width'] = width
+        if height:
+            self.legend['height'] = height
     
     def endpoint_url(self):
         return f"/workspaces/{self.workspace}/styles/{self.name}.json"

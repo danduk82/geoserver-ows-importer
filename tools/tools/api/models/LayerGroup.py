@@ -148,8 +148,8 @@ class LayerGroup:
     def __init__(self,
                 workspace_name,
                 layer_group_name,
-                layers : list[Layer] = [],
-                styles : list[Style] = [],
+                layers = [],
+                styles = [],
                 crs = {"@class": "projected", "$": "EPSG:25833"},
                 bbox = {
                     "minx": 269387.6943774796,

@@ -13,7 +13,9 @@ import json
 
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
+# use INFO for production
+# use DEBUG for development
+logging.basicConfig(level=logging.INFO)
 log = logging.Logger(__name__)
 
 handler = logging.StreamHandler()
@@ -182,7 +184,9 @@ def createLayers(
             layerName,
             content["style_file"],
             legend_url=inputWmsServer.sublayers[sublayer].styles['inspire_common:DEFAULT']['legend'],
-            legend_format=inputWmsServer.sublayers[sublayer].styles['inspire_common:DEFAULT']['legend_format']
+            legend_format=inputWmsServer.sublayers[sublayer].styles['inspire_common:DEFAULT']['legend_format'],
+            legend_width=inputWmsServer.sublayers[sublayer].styles['inspire_common:DEFAULT']['legend_width'],
+            legend_height=inputWmsServer.sublayers[sublayer].styles['inspire_common:DEFAULT']['legend_height']
         )
         geoserver.update_style(
             workspace,
