@@ -240,7 +240,10 @@ class GeoserverAPI:
         title = "",
         abstract="",
         keywords = {"string": []},
-        disabled_services = []
+        disabled_services = [],
+        metadata_url=None,
+        metadata_type="TC211",
+        metadata_format="text/xml"
     ):
         log.debug(f"inside method : create_featuretype")
         if not layer_name in self.get_featuretype_per_datastore(workspace_name, store_name):
@@ -253,7 +256,10 @@ class GeoserverAPI:
                 internationalTitle= {"de-DE": title},
                 internationalAbstract={"de-DE": abstract},
                 keywords=keywords,
-                disabled_services=disabled_services
+                disabled_services=disabled_services,
+                metadata_url=metadata_url,
+                metadata_type=metadata_type,
+                metadata_format=metadata_format
             )
             self.geoserverRestApi.POST(self.featuretypes[workspace_name][store_name].endpoint_url(), newFeatureType.post_payload())
 

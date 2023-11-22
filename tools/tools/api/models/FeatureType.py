@@ -116,8 +116,11 @@ class FeatureType:
                 internationalTitle = {"de-DE": "change-me - title"},
                 internationalAbstract = {"de-DE": "change-me - abstract"},
                 keywords = {},
-                disabled_services=[]
-                ) -> None:
+                disabled_services=[],
+                metadata_url=None,
+                metadata_type="TC211",
+                metadata_format="text/xml"
+            ) -> None:
         self.workspace_name = workspace_name
         self.store_name = store_name
         self.layer_name = layer_name
@@ -127,6 +130,7 @@ class FeatureType:
         self.srs = srs
         self.keywords = keywords
         self.disabled_services = disabled_services
+        self.create_metadata_link(metadata_url, metadata_type, metadata_format)
         
     @property
     def responseSchema(self):
@@ -150,8 +154,20 @@ class FeatureType:
         if self.disabled_services != []:
             payload["featureType"]["serviceConfiguration"] = True
             payload["featureType"]["disabledServices"] = { "string" : self.disabled_services}
+        if self.metadataLink != {}:
+            payload["featureType"]["metadataLinks"] = self.metadataLink
         return payload
-   
+    
+    def create_metadata_link(self, metadata_url=None, metadata_type="TC211", metadata_format="text/xml"):
+        self.metadataLink = {}
+        if metadata_url:
+            self.metadataLink["metadataLink"] = {
+                    "type": metadata_format,
+                    "metadataType": metadata_type,
+                    "content": metadata_url
+                }
+
+
     def validate(self, response):
         try:
             jsonschema.validate(response, self.responseSchema)

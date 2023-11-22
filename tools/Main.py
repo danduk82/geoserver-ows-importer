@@ -58,7 +58,7 @@ def load_config(args: ap.Namespace)->ScriptConfiguration:
 def convert_keys_to_lowercase(input_dict):
     return {key.lower(): value for key, value in input_dict.items()}
 
-def rewrite_csw_id_url(url: str, config: ConfigParser):
+def rewrite_csw_id_url(url: str, config: ConfigParser, add_output_schema=True):
     parsed_url = urlparse(url)
     query_params = convert_keys_to_lowercase(parse_qs(parsed_url.query, keep_blank_values=True))
 
@@ -67,6 +67,8 @@ def rewrite_csw_id_url(url: str, config: ConfigParser):
         if param != "host":
             new_query_params[param] = value
     new_query_params['id'] = query_params['id'][0]
+    if not add_output_schema:
+        del new_query_params['outputschema']
     params_string = "&".join([f"{key}={value}" for key, value in new_query_params.items()])        
     rewrited_url = f"{config['inspire']['host']}?{params_string}"
     # for the moment, just return the url
@@ -170,7 +172,10 @@ def createLayers(
             title = inputWmsServer.sublayers[sublayer].title,
             abstract = inputWmsServer.sublayers[sublayer].abstract,
             keywords = {"string": inputWmsServer.sublayers[sublayer].keywords},
-            disabled_services = disabled_services
+            disabled_services = disabled_services,
+            metadata_url = rewrite_csw_id_url(inputWmsServer.sublayers[sublayer].metadataUrls[0]['url'], config.defaults, add_output_schema=False),
+            metadata_type = inputWmsServer.sublayers[sublayer].metadataUrls[0]['type'],
+            metadata_format = inputWmsServer.sublayers[sublayer].metadataUrls[0]['format']
         )
         geoserver.create_style(
             workspace,
@@ -200,8 +205,7 @@ def createLayers(
         )
 
 
-            
-            
+
     # geoserver.create_layergroup(
     #     workspace_name=workspace,
     #     layergroup_name=layergroup_name,
@@ -210,9 +214,6 @@ def createLayers(
     #     internationalAbstract={config.defaults['inspire']['default_language']: inputWmsServer.wms.contents[layergroup_name].abstract},
     #     metadataLinksIdentifier=rewrite_csw_id_url(inputWmsServer.wms.contents[layergroup_name].metadataUrls[0]['url'], config.defaults),
     # )
-            
-
-       
 
 def main():
 
