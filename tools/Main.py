@@ -10,6 +10,7 @@ from tools.PGMetadata import PGMetadata
 from tools.domain.GdiDeServiceWMS import GdiDeServiceWMS
 from configparser import ConfigParser
 import json
+import xmltodict
 
 import logging
 
@@ -82,9 +83,10 @@ def activateWmsServices(geoserver: GeoserverAPI, workspace: str, config: ConfigP
     overrideMetadataEntries = {}
     try:
         # The identifier is not always available
-        identifier = wms_importer.inspireCapabilities["inspire_vs:ExtendedCapabilities"]["inspire_dls:SpatialDataSetIdentifier"]["inspire_common:Code"]
+        identifier = xmltodict.parse(wms_importer.wms.getServiceXML())['WMS_Capabilities']['Capability']['Layer']['Identifier']['#text']
     except:
         identifier = ""
+        log.warning(f"Root layer identifier not found in {wms_importer.wms.getServiceXML()}")
     wmsService = GdiDeServiceWMS(
             workspace=workspace,
             config=config["wmsservice"],
