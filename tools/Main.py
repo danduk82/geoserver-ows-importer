@@ -147,6 +147,21 @@ def createWmsLayer(
         ):
     pass
     
+def find_style(sublayerStyleSection, config, layerName):
+    for possibleStyle in json.loads(config.defaults["wmsservice"]["possibleStyleNames"]):
+        log.debug(f"find_style: Trying style {possibleStyle}")
+        sublayerStyle = None
+        try:
+            sublayerStyle = sublayerStyleSection[possibleStyle]
+            log.debug(f"find_style: Found style {possibleStyle}")
+            break
+        except KeyError:
+            pass
+    if not sublayerStyle:
+        raise Exception(f"Could not find style for sublayer {layerName}, please check your configurtion in default.ini['wmsservice']['possibleStyleNames']")
+    return sublayerStyle
+        
+        
 
 def createLayers(
         geoserver: GeoserverAPI,
@@ -186,16 +201,17 @@ def createLayers(
             style_name,
             content["style_file"]
         )
-        log.debug(f"legend_url={inputWmsServer.sublayers[sublayer].styles['inspire_common:DEFAULT']['legend']}")
-        log.debug(f"legend_format={inputWmsServer.sublayers[sublayer].styles['inspire_common:DEFAULT']['legend_format']}")
+        styleSection = find_style(inputWmsServer.sublayers[sublayer].styles, config, layerName)
+        log.debug(f"legend_url={styleSection['legend']}")
+        log.debug(f"legend_format={styleSection['legend_format']}")
         geoserver.update_style_legend(
             workspace,
             style_name,
             content["style_file"],
-            legend_url=inputWmsServer.sublayers[sublayer].styles['inspire_common:DEFAULT']['legend'],
-            legend_format=inputWmsServer.sublayers[sublayer].styles['inspire_common:DEFAULT']['legend_format'],
-            legend_width=inputWmsServer.sublayers[sublayer].styles['inspire_common:DEFAULT']['legend_width'],
-            legend_height=inputWmsServer.sublayers[sublayer].styles['inspire_common:DEFAULT']['legend_height']
+            legend_url=styleSection['legend'],
+            legend_format=styleSection['legend_format'],
+            legend_width=styleSection['legend_width'],
+            legend_height=styleSection['legend_height']
         )
         geoserver.update_style(
             workspace,
