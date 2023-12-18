@@ -267,9 +267,17 @@ class GeoserverAPI:
             self.geoserverRestApi.POST(self.featuretypes[workspace_name][store_name].endpoint_url(), newFeatureType.post_payload())
 
     
-    def update_default_style(self, workspace_name, layer_name, style_name):
+    def update_default_style(
+                                self,
+                                workspace_name,
+                                layer_name,
+                                style_name,
+                                autorityUrl = {"name": "GDI-DE","href": "https://www.gdi-de.org"},
+                                identifier = {"authority": "GDI-DE","identifier": "https://gdi.de/identifier"}
+                            ):
         updateLayer = Layer.Layer(workspace_name, layer_name)
-        self.geoserverRestApi.PUT(updateLayer.endpoint_url(), updateLayer.put_payload_style(style_name))
+        self.geoserverRestApi.PUT(updateLayer.endpoint_url(), updateLayer.put_payload_style(style_name, autorityUrl, identifier))
+        
 
     def delete_featuretype(self, workspace_name, store_name, layer_name):
         raise NotImplementedError

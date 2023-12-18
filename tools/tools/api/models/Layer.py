@@ -102,12 +102,18 @@ class Layer:
         }
     
    
-    def put_payload_style(self, style_name):
+    def put_payload_style(self, style_name, authorityURLs, identifier):
         return {
             "layer": {
                 "name": self.layer_name,
                 "defaultStyle": {
                     "name": style_name
+                },
+                "authorityURLs": {
+                    "AuthorityURL": authorityURLs
+                },
+                "identifiers": {
+                    "Identifier": identifier
                 }
             }
         }

@@ -161,6 +161,16 @@ def find_style(sublayerStyleSection, config, layerName):
         raise Exception(f"Could not find style for sublayer {layerName}, please check your configurtion in default.ini['wmsservice']['possibleStyleNames']")
     return sublayerStyle
 
+def extract_layer_identifier(inputWmsServer):
+    # create a dictionary of sublayer identifiers
+    identifiers = {}
+    for layer in xmltodict.parse(inputWmsServer.wms.getServiceXML())['WMS_Capabilities']['Capability']['Layer']['Layer']:
+        try:
+            identifiers[layer['Name']] = {"identifier":layer['Identifier']['#text'], "authority": layer['Identifier']['@authority']}
+        except:
+            log.warning(f"Layer {layer['Name']} identifier not found")
+    return identifiers
+
 def createLayers(
         geoserver: GeoserverAPI,
         workspace: str,
@@ -172,6 +182,7 @@ def createLayers(
     sublayers = json.loads(config.configParser['layer']['sublayers'])
     sublayers_list = []
     layergroup_name = config.configParser['layer']['layername']
+    layerIdentifiers = extract_layer_identifier(inputWmsServer)
     for sublayer, content in sublayers.items():
         layerName = f"{config.configParser['layer']['layername']}_{sublayer}"
         sublayers_list.append(layerName)
@@ -216,10 +227,15 @@ def createLayers(
             style_name,
             content["style_file"]
         )
+        autorityUrl= json.loads(config.configParser['layer']['authorityUrl']),
+        identifier = layerIdentifiers[sublayer]
+
         geoserver.update_default_style(
             workspace,
             layerName,
-            style_name
+            style_name,
+            autorityUrl= autorityUrl,
+            identifier = identifier
         )
 
 
