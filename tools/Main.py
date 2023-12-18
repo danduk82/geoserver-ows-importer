@@ -11,12 +11,13 @@ from tools.domain.GdiDeServiceWMS import GdiDeServiceWMS
 from configparser import ConfigParser
 import json
 import xmltodict
+from tools.api.models.Common import KeyDollarListDict
 
 import logging
 
 # use INFO for production
 # use DEBUG for development
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 log = logging.Logger(__name__)
 
 handler = logging.StreamHandler()
@@ -112,10 +113,11 @@ def activateWfsServices(geoserver: GeoserverAPI, workspace: str, config: ConfigP
     raise NotImplementedError
     
 def createDatastore(geoserver: GeoserverAPI, workspace: str, datastore_name: str, config: ScriptConfiguration):
-
+    postgisStoreDefaults = KeyDollarListDict(json.loads(config.defaults['wmsservice']['postgisDataStoreDefaults']))
     geoserver.create_datastore(
         workspace,
         datastore_name,
+        postgisStoreDefaults,
         config.configParser['database']['host'],
         config.configParser['database']['port'],
         config.configParser['database']['database'],

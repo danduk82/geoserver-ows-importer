@@ -15,7 +15,6 @@ class KeyDollarListDict(dict):
 
        
     def deserialize(self, input_list):
-        print(input_list)
         for item in input_list:
             key = item[self.key_prefix]
             value = item[self.value_prefix]
@@ -29,3 +28,7 @@ class KeyDollarListDict(dict):
     
     def __str__(self):
         return json.dumps(self.serialize())
+    
+    # def update(self, other: dict):
+    #     for key, value in other.items():
+    #         super().__setitem__(key, value)

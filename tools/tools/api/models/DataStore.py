@@ -68,8 +68,8 @@ class DataStore:
     def __init__(self, workspace_name, data_store_name, connection_parameters, data_store_type="PostGIS") -> None:
         self.workspace_name = workspace_name
         self.data_store_name = data_store_name
-        self.connection_parameters = KeyDollarListDict()
-        self.connection_parameters.update(connection_parameters)
+        self.connection_parameters = connection_parameters
+        #self.connection_parameters.update(connection_parameters)
         self.data_store_type = data_store_type
 
         

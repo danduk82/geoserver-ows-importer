@@ -22,6 +22,8 @@ from .models import (
     Style
 )
 
+from .models.Common import KeyDollarListDict
+
 import logging
 log = logging.getLogger()
 
@@ -124,6 +126,7 @@ class GeoserverAPI:
         self,
         workspace_name,
         store_name,
+        connectionParameters: KeyDollarListDict,
         host="172.17.0.1",
         port="5432",
         database="test",
@@ -133,7 +136,7 @@ class GeoserverAPI:
     ):
         log.debug(f"inside method : create_datastore")
         if not store_name in self.get_datastores_per_workspace(workspace_name):
-            connectionParameters = {"host": host, "port": port, "database": database, "user": username, "passwd": password, "schema": schema, "dbtype": "postgis"}
+            connectionParameters.update({"host": host, "port": port, "database": database, "user": username, "passwd": password, "schema": schema, "dbtype": "postgis"})
             newDataStore = DataStore.DataStore(
                 workspace_name,
                 store_name,
