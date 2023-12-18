@@ -257,7 +257,7 @@ class GeoserverAPI:
                 table_name=table_name,
                 srs=srs,
                 internationalTitle= {"de-DE": title},
-                internationalAbstract={"de-DE": abstract},
+                internationalAbstract={"de-DE": abstract} if abstract else None,
                 keywords=keywords,
                 disabled_services=disabled_services,
                 metadata_url=metadata_url,

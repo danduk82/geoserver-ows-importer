@@ -114,7 +114,7 @@ class FeatureType:
                 table_name,
                 srs = "EPSG:4326",
                 internationalTitle = {"de-DE": "change-me - title"},
-                internationalAbstract = {"de-DE": "change-me - abstract"},
+                internationalAbstract = None,
                 keywords = {},
                 disabled_services=[],
                 metadata_url=None,
@@ -156,6 +156,8 @@ class FeatureType:
             payload["featureType"]["disabledServices"] = { "string" : self.disabled_services}
         if self.metadataLink != {}:
             payload["featureType"]["metadataLinks"] = self.metadataLink
+        if not self.internationalAbstract:
+            del payload["featureType"]["internationalAbstract"]
         return payload
     
     def create_metadata_link(self, metadata_url=None, metadata_type="TC211", metadata_format="text/xml"):

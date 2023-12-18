@@ -160,8 +160,6 @@ def find_style(sublayerStyleSection, config, layerName):
     if not sublayerStyle:
         raise Exception(f"Could not find style for sublayer {layerName}, please check your configurtion in default.ini['wmsservice']['possibleStyleNames']")
     return sublayerStyle
-        
-        
 
 def createLayers(
         geoserver: GeoserverAPI,
