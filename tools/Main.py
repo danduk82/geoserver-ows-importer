@@ -183,14 +183,14 @@ def createLayers(
         )
         geoserver.create_style(
             workspace,
-            layerName,
+            style_name,
             content["style_file"]
         )
         log.debug(f"legend_url={inputWmsServer.sublayers[sublayer].styles['inspire_common:DEFAULT']['legend']}")
         log.debug(f"legend_format={inputWmsServer.sublayers[sublayer].styles['inspire_common:DEFAULT']['legend_format']}")
         geoserver.update_style_legend(
             workspace,
-            layerName,
+            style_name,
             content["style_file"],
             legend_url=inputWmsServer.sublayers[sublayer].styles['inspire_common:DEFAULT']['legend'],
             legend_format=inputWmsServer.sublayers[sublayer].styles['inspire_common:DEFAULT']['legend_format'],
@@ -199,13 +199,13 @@ def createLayers(
         )
         geoserver.update_style(
             workspace,
-            layerName,
+            style_name,
             content["style_file"]
         )
         geoserver.update_default_style(
             workspace,
             layerName,
-            layerName
+            style_name
         )
 
 
