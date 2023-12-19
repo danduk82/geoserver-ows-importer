@@ -64,9 +64,7 @@ class SettingsWMS:
                             "properties": {
                             "@key": {"type": "string"},
                             "$": {"type": "string"}
-                            },
-                            "required": ["@key", "$"]
-                        }
+                            }                        }
                         }
                     },
                     "required": ["entry"]
@@ -104,17 +102,13 @@ class SettingsWMS:
                     "remoteStyleTimeout": {"type": "integer"},
                     "defaultGroupStyleEnabled": {"type": "boolean"}
                 },
-                "required": [
-                    "workspace",
-                    "enabled",
-                    "name"
-                ]
+                "required": []
                 }
             },
             "required": ["wms"]
             }
     
-    def __init__(self, workspace) -> None:
+    def __init__(self, workspace="default") -> None:
         self.workspace = workspace
         self.wms = None
 
@@ -142,6 +136,9 @@ class SettingsWMS:
     def endpoint_url(self):
         return f"/services/wms/workspaces/{self.workspace}/settings.json"
 
+    def endpoint_url_default_service(self):
+        return f"/services/wms/settings.json"
+
    
     def validate(self, response):
         try:
@@ -155,6 +152,6 @@ class SettingsWMS:
         if response.status_code == 200:
             # Parse the JSON response
             self.wms = response.json()
-            self.validate(self.settingsWMS)
+            self.validate(self.wms)
         else:
             log.error(f"Error: {response.status_code}")

@@ -80,6 +80,13 @@ def createWorkspace(geoserver: GeoserverAPI, workspace: str):
     geoserver.create_workspace(workspace)
     geoserver.update_namespace(workspace, workspace)
     
+def set_keywords(geoserver: GeoserverAPI, wms_importer: WMSLayerImporter):
+    log.debug(f"into set_keywords()")
+    defautWmsService = geoserver.get_default_wms_service()
+    log.debug(defautWmsService['wms']['keywords']['string'])
+    defaultKeyworkds = defautWmsService['wms']['keywords']['string']
+    return list(set(defaultKeyworkds + wms_importer.wms.identification.keywords))
+    
 def activateWmsServices(geoserver: GeoserverAPI, workspace: str, config: ConfigParser,wms_importer: WMSLayerImporter):
     overrideMetadataEntries = {}
     try:
@@ -91,7 +98,7 @@ def activateWmsServices(geoserver: GeoserverAPI, workspace: str, config: ConfigP
     wmsService = GdiDeServiceWMS(
             workspace=workspace,
             config=config["wmsservice"],
-            keywords=wms_importer.wms.identification.keywords,
+            keywords=set_keywords(geoserver, wms_importer),
             fees = wms_importer.wms.identification.fees,
             accessConstraints = wms_importer.wms.identification.accessconstraints,
             internationalAbstract = wms_importer.wms.identification.abstract,
@@ -128,6 +135,8 @@ def createDatastore(geoserver: GeoserverAPI, workspace: str, datastore_name: str
     #log.debug(geoserver.get_datastore(workspace, store_name=datastore_name))
 
 def getLayerPostGisMetadata(config: ScriptConfiguration, schema_name: str, table_name: str):
+    # This medthod is not used for the moment
+    # it might be useful if we need to get the featuretype metadata from the database
     metadata = PGMetadata(
         schema_name,
         table_name,
@@ -191,6 +200,8 @@ def createLayers(
         style_name = f"{workspace}_{content['style_name']}"
         disabled_services = config.configParser['layer']['disabled_services'].split(",") if config.configParser['layer']['disabled_services'] else []
         log.debug(f"disabled_services={disabled_services}")
+        keywords = set_keywords(geoserver, inputWmsServer)
+        log.debug(f"keywords for layer {sublayer} = {keywords}")
         geoserver.create_featuretype(
             workspace,
             datastore_name,
@@ -199,7 +210,7 @@ def createLayers(
             srs,
             title = inputWmsServer.sublayers[sublayer].title,
             abstract = inputWmsServer.sublayers[sublayer].abstract,
-            keywords = {"string": inputWmsServer.sublayers[sublayer].keywords},
+            keywords = {"string": keywords},
             disabled_services = disabled_services,
             metadata_url = rewrite_csw_id_url(inputWmsServer.sublayers[sublayer].metadataUrls[0]['url'], config.defaults, add_output_schema=False),
             metadata_type = inputWmsServer.sublayers[sublayer].metadataUrls[0]['type'],

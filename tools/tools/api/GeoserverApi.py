@@ -232,7 +232,18 @@ class GeoserverAPI:
                 )
             self.geoserverRestApi.POST(self.layergroups[workspace_name].endpoint_url(), newLayerGroup.post_payload())
 
-    
+    def _set_default_wms_service(self):
+        log.debug(f"inside method : get_default_wms_service")
+        self.defaultWmsSettings = SettingsWMS.SettingsWMS()
+        response = self.geoserverRestApi.GET(self.defaultWmsSettings.endpoint_url_default_service())
+        self.defaultWmsSettings.parseResponse(response)
+        
+    def get_default_wms_service(self):
+        log.debug(f"inside method : get_default_wms_service")
+        if not hasattr(self, "defaultWmsSettings"):
+            self._set_default_wms_service()
+        return self.defaultWmsSettings.wms
+                
     def create_featuretype(
         self,
         workspace_name,
