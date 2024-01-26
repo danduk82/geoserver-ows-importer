@@ -25,14 +25,22 @@ class GdiDeServiceWFS(SettingsWFS):
         self.metadata_entries.update(overrideMetadataEntries)
         self.wfs["workspace"]["name"] = workspace
         self.wfs["keywords"]["string"] = list(set(keywords + json.loads(config["keywords"])))
-        self.wfs["srs"]["string"] = srs if srs != [] else json.loads(config["srs"])
+        try:
+            for to_remove in config["keywordsToRemove"].split(","):
+                self.wfs["keywords"]["string"].remove(to_remove)
+        except ValueError:
+            log.debug("No keywords to remove found")
+        try:
+            self.wfs["srs"]["string"] = srs if srs != [] else json.loads(config["srs"])
+        except KeyError:
+            log.warning("No srs found in config")
         self.wfs["fees"] = fees
         self.wfs["accessConstraints"] = accessConstraints
         self.wfs["internationalAbstract"]["de-DE"] = internationalAbstract
         self.wfs["internationalTitle"]["de-DE"] = internationalTitle
         self.wfs["getFeatureOutputTypes"]["string"] = json.loads(config["allowedOutputFormats"])
         self.wfs["metadata"]["entry"] = self.metadata_entries.serialize()
-        self.wfs["identifiers"]["Identifier"][0]["identifier"] = identifier
+        #FIXME self.wfs["identifiers"]["Identifier"][0]["identifier"] = identifier
 
         
     def put_payload(self):
