@@ -387,7 +387,6 @@ class GeoserverAPI:
         log.debug(f"inside method : activate_wms_service")
         self.geoserverRestApi.PUT(wmsService.endpoint_url(), wmsService.put_payload())
         
-    def activate_wfs_service(self, workspace_name):
+    def activate_wfs_service(self, workspace_name, wfsService):
         log.debug(f"inside method : activate_wfs_service")
-        updateSettingsWFS = SettingsWFS.SettingsWFS(workspace_name)
-        self.geoserverRestApi.PUT(updateSettingsWFS.endpoint_url(), updateSettingsWFS.put_payload(enabled="true"))
+        self.geoserverRestApi.PUT(wfsService.endpoint_url(), wfsService.put_payload())
