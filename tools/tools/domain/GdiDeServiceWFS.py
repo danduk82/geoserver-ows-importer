@@ -39,6 +39,8 @@ class GdiDeServiceWFS(SettingsWFS):
         self.wfs["internationalAbstract"]["de-DE"] = internationalAbstract
         self.wfs["internationalTitle"]["de-DE"] = internationalTitle
         self.wfs["getFeatureOutputTypes"]["string"] = json.loads(config["allowedOutputFormats"])
+        log.debug(f"identifier: {identifier}")
+        self.metadata_entries.update({"inspire.spatialDatasetIdentifier": f"GDI-DE,https://www.gdi-de.org,{identifier}"})
         self.wfs["metadata"]["entry"] = self.metadata_entries.serialize()
         #FIXME self.wfs["identifiers"]["Identifier"][0]["identifier"] = identifier
 
