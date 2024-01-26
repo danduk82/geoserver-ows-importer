@@ -37,8 +37,8 @@ class GdiDeServiceWMS(SettingsWMS):
         
     def put_payload(self):
         payload = { "wms": self.wms }
-        with open("/tmp/payload_wms.json", "w") as f:
-            f.write(json.dumps(payload))
+        # with open("/tmp/payload_wms.json", "w") as f:
+        #     f.write(json.dumps(payload))
         return payload
         
         

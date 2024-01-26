@@ -42,13 +42,12 @@ class GdiDeServiceWFS(SettingsWFS):
         log.debug(f"identifier: {identifier}")
         self.metadata_entries.update({"inspire.spatialDatasetIdentifier": f"GDI-DE,https://www.gdi-de.org,{identifier}"})
         self.wfs["metadata"]["entry"] = self.metadata_entries.serialize()
-        #FIXME self.wfs["identifiers"]["Identifier"][0]["identifier"] = identifier
 
         
     def put_payload(self):
         payload = { "wfs": self.wfs }
-        with open("/tmp/payload_wfs.json", "w") as f:
-            f.write(json.dumps(payload))
+        # with open("/tmp/payload_wfs.json", "w") as f:
+        #     f.write(json.dumps(payload))
         return payload
         
         
