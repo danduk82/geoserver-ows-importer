@@ -198,11 +198,26 @@ def find_style(sublayerStyleSection, config, layerName):
 def extract_layer_identifier(inputWmsServer):
     # create a dictionary of sublayer identifiers
     identifiers = {}
-    for layer in xmltodict.parse(inputWmsServer.wms.getServiceXML())['WMS_Capabilities']['Capability']['Layer']['Layer']:
-        try:
-            identifiers[layer['Name']] = {"identifier":layer['Identifier']['#text'], "authority": layer['Identifier']['@authority']}
-        except:
-            log.warning(f"Layer {layer['Name']} identifier not found")
+    xml_data = xmltodict.parse(inputWmsServer.wms.getServiceXML())
+    capabilities = xml_data['WMS_Capabilities']['Capability']['Layer']
+    if 'Layer' in capabilities:
+        layers = capabilities['Layer']
+        if isinstance(layers, list):
+            log.debug("layers is list!")
+            for layer in layers:
+                try:
+                    identifiers[layer['Name']] = {"identifier": layer.get('Identifier', {}).get('#text', ''), 
+                                                   "authority": layer.get('Identifier', {}).get('@authority', '')}
+                except Exception as e:
+                    log.warning(f"Error processing layer {layer['Name']}: {e}")
+        elif isinstance(layers, dict):
+            log.debug("layers is dictionary!")
+            layer = layers
+            try:
+                identifiers[layer['Name']] = {"identifier": layer.get('Identifier', {}).get('#text', ''), 
+                                               "authority": layer.get('Identifier', {}).get('@authority', '')}
+            except Exception as e:
+                log.warning(f"Error processing layer {layer['Name']}: {e}")
     return identifiers
 
 def createLayers(
