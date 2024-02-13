@@ -27,7 +27,7 @@ class GdiDeServiceWFS(SettingsWFS):
         self.wfs["keywords"]["string"] = list(set(keywords + json.loads(config["keywords"])))
         try:
             for to_remove in config["keywordsToRemove"].split(","):
-                self.wfs["keywords"]["string"].remove(to_remove)
+                self.wfs["keywords"]["string"].remove(to_remove.strip())
         except ValueError:
             log.debug("No keywords to remove found")
         try:

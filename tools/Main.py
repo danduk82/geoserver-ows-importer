@@ -137,9 +137,7 @@ def activateWmsAndWfsServices(geoserver: GeoserverAPI,
         )
     geoserver.activate_wfs_service(workspace, wfsService)
             
-    
-    
-    
+
 def activateWfsServices(geoserver: GeoserverAPI, workspace: str, config: ConfigParser, wfs_importer: WFSLayerImporter):
     # geoserver.activate_wfs_service(workspace)
     raise NotImplementedError
