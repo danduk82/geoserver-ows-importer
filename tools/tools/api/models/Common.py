@@ -17,7 +17,10 @@ class KeyDollarListDict(dict):
     def deserialize(self, input_list):
         for item in input_list:
             key = item[self.key_prefix]
-            value = item[self.value_prefix]
+            if self.value_prefix in item:
+                value = item[self.value_prefix]
+            else:
+                value = None
             super().__setitem__(key, value)
     
     def serialize(self):

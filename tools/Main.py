@@ -8,6 +8,7 @@ from tools.api.GeoserverApi import GeoserverAPI
 from tools.api.models.Layer import Layer
 from tools.PGMetadata import PGMetadata
 from tools.domain.GdiDeServiceWMS import GdiDeServiceWMS
+from tools.domain.GdiDeServiceWFS import GdiDeServiceWFS
 from configparser import ConfigParser
 import json
 import xmltodict
@@ -87,7 +88,11 @@ def set_keywords(geoserver: GeoserverAPI, wms_importer: WMSLayerImporter):
     defaultKeyworkds = defautWmsService['wms']['keywords']['string']
     return list(set(defaultKeyworkds + wms_importer.wms.identification.keywords))
     
-def activateWmsServices(geoserver: GeoserverAPI, workspace: str, config: ConfigParser,wms_importer: WMSLayerImporter):
+def activateWmsAndWfsServices(geoserver: GeoserverAPI,
+                        workspace: str,
+                        config: ConfigParser,
+                        wms_importer: WMSLayerImporter, 
+                        wfs_importer: WFSLayerImporter = None):
     overrideMetadataEntries = {}
     try:
         # The identifier is not always available
@@ -111,9 +116,29 @@ def activateWmsServices(geoserver: GeoserverAPI, workspace: str, config: ConfigP
                 },
             identifier = identifier
         )
-    
-    
     geoserver.activate_wms_service(workspace, wmsService)
+    
+    wfsService = GdiDeServiceWFS(
+            workspace=workspace,
+            config=config["wfsservice"],
+            keywords=set_keywords(geoserver, wms_importer),
+            fees=wms_importer.wms.identification.fees,
+            accessConstraints = wms_importer.wms.identification.accessconstraints,
+            #FIXME: accessConstraints=wfs_importer.wfs.identification.accessconstraints,
+            internationalAbstract=wms_importer.wms.identification.abstract,
+            internationalTitle=wms_importer.wms.identification.title,
+            overrideMetadataEntries={
+                "inspire.metadataURL": rewrite_csw_id_url(
+                        wms_importer.inspireCapabilities["inspire_vs:ExtendedCapabilities"]["inspire_common:MetadataUrl"]["inspire_common:URL"],
+                        config
+                    )
+                },
+            identifier = identifier
+        )
+    geoserver.activate_wfs_service(workspace, wfsService)
+            
+    
+    
     
 def activateWfsServices(geoserver: GeoserverAPI, workspace: str, config: ConfigParser, wfs_importer: WFSLayerImporter):
     # geoserver.activate_wfs_service(workspace)
@@ -280,7 +305,7 @@ def main():
 
     workspace = config.configParser['layer']['workspace']
     createWorkspace(geoserver, workspace)
-    activateWmsServices(geoserver, workspace, config.defaults, inputWmsServer)
+    activateWmsAndWfsServices(geoserver, workspace, config.defaults, inputWmsServer)
     schema = config.configParser['database']['schema']
     datastore_name = f"pg_{schema}"
     createDatastore(geoserver, workspace, datastore_name, config)
