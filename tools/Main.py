@@ -128,10 +128,7 @@ def activateWmsAndWfsServices(geoserver: GeoserverAPI,
             internationalAbstract=wms_importer.wms.identification.abstract,
             internationalTitle=wms_importer.wms.identification.title,
             overrideMetadataEntries={
-                "inspire.metadataURL": rewrite_csw_id_url(
-                        wms_importer.inspireCapabilities["inspire_vs:ExtendedCapabilities"]["inspire_common:MetadataUrl"]["inspire_common:URL"],
-                        config
-                    )
+                "inspire.metadataURL": config["wfsservice"]["serviceMetadataUrl"]
                 },
             identifier = identifier
         )
