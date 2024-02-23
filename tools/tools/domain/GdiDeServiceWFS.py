@@ -44,8 +44,9 @@ class GdiDeServiceWFS(SettingsWFS):
         self.wfs["metadata"]["entry"] = self.metadata_entries.serialize()
 
         
-    def put_payload(self):
+    def put_payload(self, enabled=True):
         payload = { "wfs": self.wfs }
+        payload["wfs"]["enabled"] = enabled
         # with open("/tmp/payload_wfs.json", "w") as f:
         #     f.write(json.dumps(payload))
         return payload

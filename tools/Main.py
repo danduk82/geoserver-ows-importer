@@ -92,7 +92,8 @@ def activateWmsAndWfsServices(geoserver: GeoserverAPI,
                         workspace: str,
                         config: ConfigParser,
                         wms_importer: WMSLayerImporter, 
-                        wfs_importer: WFSLayerImporter = None):
+                        wfs_importer: WFSLayerImporter = None,
+                        disabled_services: list = []):
     overrideMetadataEntries = {}
     try:
         # The identifier is not always available
@@ -116,7 +117,7 @@ def activateWmsAndWfsServices(geoserver: GeoserverAPI,
                 },
             identifier = identifier
         )
-    geoserver.activate_wms_service(workspace, wmsService)
+    geoserver.activate_wms_service(workspace, wmsService, enabled = not "WMS" in disabled_services)
     
     wfsService = GdiDeServiceWFS(
             workspace=workspace,
@@ -132,7 +133,8 @@ def activateWmsAndWfsServices(geoserver: GeoserverAPI,
                 },
             identifier = identifier
         )
-    geoserver.activate_wfs_service(workspace, wfsService)
+    
+    geoserver.activate_wfs_service(workspace, wfsService, enabled = not "WFS" in disabled_services)
             
 
 def activateWfsServices(geoserver: GeoserverAPI, workspace: str, config: ConfigParser, wfs_importer: WFSLayerImporter):
@@ -283,6 +285,7 @@ def createLayers(
             autorityUrl= autorityUrl,
             identifier = identifier
         )
+        # raise NotImplementedError
 
 
 
@@ -315,11 +318,11 @@ def main():
 
     workspace = config.configParser['layer']['workspace']
     createWorkspace(geoserver, workspace)
-    activateWmsAndWfsServices(geoserver, workspace, config.defaults, inputWmsServer)
+    disabled_services = config.configParser['layer']['disabled_services'].split(",") if config.configParser['layer']['disabled_services'] else []
+    activateWmsAndWfsServices(geoserver, workspace, config.defaults, inputWmsServer, disabled_services=disabled_services)
     schema = config.configParser['database']['schema']
-    datastore_name = f"pg_{schema}"
+    datastore_name = f"{workspace}_pg_{schema}"
     createDatastore(geoserver, workspace, datastore_name, config)
-    # 
     createLayers(geoserver, workspace, datastore_name, config, inputWmsServer)
     
     

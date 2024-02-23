@@ -35,8 +35,9 @@ class GdiDeServiceWMS(SettingsWMS):
         self.wms["identifiers"]["Identifier"][0]["identifier"] = identifier
 
         
-    def put_payload(self):
+    def put_payload(self, enabled=True):
         payload = { "wms": self.wms }
+        payload["wms"]["enabled"] = enabled
         # with open("/tmp/payload_wms.json", "w") as f:
         #     f.write(json.dumps(payload))
         return payload
