@@ -230,7 +230,7 @@ def createLayers(
     layergroup_name = config.configParser['layer']['layername']
     layerIdentifiers = extract_layer_identifier(inputWmsServer)
     for sublayer, content in sublayers.items():
-        layerName = f"{config.configParser['layer']['layername']}_{sublayer}"
+        layerName = f"{workspace}_{config.configParser['layer']['layername']}_{sublayer}"
         sublayers_list.append(layerName)
         tableName = content["table_name"]
         srs = content["srs"]
